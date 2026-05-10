@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Booking Details - RailGo</title>
+<script src="common.js?v=4"></script>
+<script>
+const _confParams = new URLSearchParams(window.location.search);
+if (!_confParams.get('pnr')) {
+  window.location.replace('index.html');
+}
+</script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
+.hero-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.hero-blob{position:absolute;border-radius:50%;filter:blur(80px);animation:blobFloat 12s ease-in-out infinite alternate;}
+.blob1{width:500px;height:500px;background:radial-gradient(circle,#6c63ff,#3b82f6);top:-120px;left:-100px;opacity:.35;}
+.blob2{width:400px;height:400px;background:radial-gradient(circle,#f472b6,#fb923c);bottom:-80px;right:-80px;opacity:.28;animation-delay:-4s;}
+.blob3{width:280px;height:280px;background:radial-gradient(circle,#34d399,#06b6d4);top:60%;left:60%;opacity:.22;animation-delay:-8s;}
+.dark-mode .blob1{opacity:.22;}.dark-mode .blob2{opacity:.18;}.dark-mode .blob3{opacity:.15;}
+@keyframes blobFloat{0%{transform:translate(0,0) scale(1);}50%{transform:translate(25px,20px) scale(1.04);}100%{transform:translate(-15px,25px) scale(.97);}}
+.page{position:relative;z-index:1;padding-top:90px;padding-bottom:60px;}
+.glass-card{background:rgba(255,255,255,0.78);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.9);border-radius:18px;box-shadow:0 8px 32px rgba(0,0,0,.08);padding:24px 28px;margin-bottom:20px;}
+.dark-mode .glass-card{background:rgba(15,20,40,0.85);border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 32px rgba(0,0,0,.4);}
+/* Success banner */
+.success-banner{background:linear-gradient(135deg,#10b981,#059669);border-radius:18px;padding:32px;text-align:center;margin-bottom:20px;position:relative;overflow:hidden;}
+.success-banner::before{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:rgba(255,255,255,.1);border-radius:50%;}
+.success-banner::after{content:'';position:absolute;bottom:-30px;left:-30px;width:90px;height:90px;background:rgba(255,255,255,.08);border-radius:50%;}
+.success-icon{font-size:3.5rem;color:#fff;animation:popIn .6s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes popIn{0%{transform:scale(0) rotate(-15deg);opacity:0;}100%{transform:scale(1) rotate(0);opacity:1;}}
+.success-title{font-size:1.6rem;font-weight:800;color:#fff;margin:12px 0 4px;}
+.success-sub{color:rgba(255,255,255,.85);font-size:.92rem;}
+/* PNR */
+.pnr-box{background:linear-gradient(135deg,rgba(108,99,255,.1),rgba(244,114,182,.08));border:2px solid rgba(108,99,255,.25);border-radius:14px;padding:18px 22px;text-align:center;}
+.pnr-label{font-size:.72rem;font-weight:700;color:#6c63ff;text-transform:uppercase;letter-spacing:1px;}
+.pnr-value{font-size:2rem;font-weight:800;letter-spacing:2px;background:linear-gradient(135deg,#6c63ff,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:4px 0;}
+/* Journey */
+.j-row{display:flex;align-items:center;gap:16px;padding:12px 0;}
+.j-time{font-size:1.4rem;font-weight:800;color:#1a1a2e;line-height:1;}
+.dark-mode .j-time{color:#f1f5f9;}
+.j-code{font-size:.7rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;}
+.j-line{flex:1;height:2px;background:linear-gradient(90deg,#6c63ff,#f472b6);border-radius:2px;position:relative;}
+.j-line i{position:absolute;top:-9px;left:50%;transform:translateX(-50%);color:#6c63ff;font-size:.95rem;}
+/* Info rows */
+.info-row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:.88rem;}
+.dark-mode .info-row{border-bottom-color:rgba(255,255,255,.06);}
+.info-row:last-child{border-bottom:none;}
+.info-label{width:140px;color:#64748b;font-weight:600;display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.info-label i{color:#6c63ff;font-size:.9rem;}
+.dark-mode .info-label{color:#94a3b8;}
+.info-val{font-weight:600;color:#1a1a2e;flex:1;}
+.dark-mode .info-val{color:#f1f5f9;}
+/* Passengers */
+.pax-row{display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid rgba(0,0,0,.05);}
+.dark-mode .pax-row{border-bottom-color:rgba(255,255,255,.05);}
+.pax-row:last-child{border-bottom:none;}
+.pax-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6c63ff,#f472b6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.85rem;flex-shrink:0;}
+.pax-name{font-weight:700;color:#1a1a2e;font-size:.9rem;}
+.dark-mode .pax-name{color:#f1f5f9;}
+.pax-meta{font-size:.76rem;color:#64748b;}
+.dark-mode .pax-meta{color:#94a3b8;}
+/* Pay summary */
+.pay-row{display:flex;justify-content:space-between;font-size:.88rem;padding:9px 0;border-bottom:1px solid rgba(0,0,0,.05);}
+.dark-mode .pay-row{border-bottom-color:rgba(255,255,255,.05);}
+.pay-row:last-of-type{border-bottom:none;}
+.pay-lbl{color:#64748b;}.dark-mode .pay-lbl{color:#94a3b8;}
+.pay-val{font-weight:600;color:#1a1a2e;}.dark-mode .pay-val{color:#f1f5f9;}
+.pay-total-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;border-top:2px solid rgba(108,99,255,.2);margin-top:4px;}
+.pay-total-lbl{font-weight:700;color:#1a1a2e;font-size:.95rem;}.dark-mode .pay-total-lbl{color:#f1f5f9;}
+.pay-total-val{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,#6c63ff,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+/* Status badge */
+.badge-paid{background:rgba(16,185,129,.12);color:#059669;border:1px solid rgba(16,185,129,.25);border-radius:20px;padding:4px 12px;font-size:.78rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;}
+.dark-mode .badge-paid{color:#34d399;}
+/* Action buttons */
+.btn-home{background:linear-gradient(135deg,#6c63ff,#3b82f6);color:#fff;border:none;border-radius:12px;padding:12px 28px;font-weight:700;cursor:pointer;transition:all .2s;font-size:.93rem;}
+.btn-home:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(108,99,255,.35);}
+.btn-outline{background:transparent;border:1.5px solid rgba(108,99,255,.3);color:#6c63ff;border-radius:12px;padding:11px 24px;font-weight:600;cursor:pointer;transition:all .2s;font-size:.93rem;}
+.btn-outline:hover{background:rgba(108,99,255,.1);}
+.dark-mode .btn-outline{color:#a5b4fc;border-color:rgba(165,180,252,.3);}
+.sec-title{font-size:1rem;font-weight:700;color:#1a1a2e;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.sec-title i{color:#6c63ff;}.dark-mode .sec-title{color:#f1f5f9;}
+/* Loading */
+.loading-state{text-align:center;padding:60px 20px;}
+.loading-spin{width:44px;height:44px;border:4px solid rgba(108,99,255,.2);border-top-color:#6c63ff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.ticket-shell{border:1.5px dashed rgba(108,99,255,.35);border-radius:18px;padding:14px;background:linear-gradient(135deg,rgba(108,99,255,.04),rgba(244,114,182,.04));}
+.ticket-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding-bottom:10px;border-bottom:1px dashed rgba(108,99,255,.25);}
+.ticket-title{font-size:1rem;font-weight:800;color:#6c63ff;letter-spacing:.2px;}
+.ticket-meta{font-size:.76rem;color:#64748b;font-weight:600;}
+.ticket-strip{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;}
+.ticket-pill{background:rgba(108,99,255,.12);color:#6c63ff;border:1px solid rgba(108,99,255,.25);border-radius:999px;padding:4px 10px;font-size:.72rem;font-weight:700;}
+.ticket-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+.btn-ticket{flex:1;min-width:170px;border:none;border-radius:10px;padding:10px 14px;font-weight:700;font-size:.86rem;cursor:pointer;}
+.btn-ticket-primary{background:linear-gradient(135deg,#6c63ff,#3b82f6);color:#fff;}
+.btn-ticket-outline{background:rgba(108,99,255,.1);color:#6c63ff;border:1px solid rgba(108,99,255,.28);}
+@media print{
+  body { background: #fff !important; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #universal-header, .hero-bg, .page, #cancel-backdrop { display: none !important; }
+  .print-only { display: block !important; }
+  @page { size: A4; margin: 15mm; }
+  
+  .print-container { font-family: 'Inter', sans-serif; color: #1e293b; max-width: 100%; }
+  .print-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #6c63ff; padding-bottom: 15px; margin-bottom: 20px; }
+  .print-logo { font-size: 24px; font-weight: 800; color: #6c63ff; display: flex; align-items: center; gap: 8px; }
+  .print-title { font-size: 16px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 1px; }
+  .print-irctc { font-size: 24px; font-weight: 800; color: #0ea5e9; }
+  
+  .print-journey-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+  .print-station { text-align: center; flex: 1; }
+  .print-station-name { font-size: 16px; font-weight: 800; color: #1e293b; margin-bottom: 4px; text-transform: uppercase; }
+  .print-station-date { font-size: 12px; color: #64748b; font-weight: 600; }
+  .print-arrow { flex: 0 0 60px; text-align: center; color: #6c63ff; font-size: 24px; }
+  
+  .print-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+  .print-data-item { display: flex; flex-direction: column; }
+  .print-data-lbl { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
+  .print-data-val { font-size: 14px; font-weight: 700; color: #0f172a; }
+  .print-pnr-val { font-size: 18px; color: #6c63ff; font-weight: 800; letter-spacing: 1px; }
+  
+  .print-section-title { font-size: 14px; font-weight: 800; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 10px; margin-top: 25px; text-transform: uppercase; letter-spacing: 0.5px; }
+  
+  .print-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+  .print-table th { background: #f1f5f9; color: #475569; font-weight: 700; text-align: left; padding: 8px; border: 1px solid #cbd5e1; }
+  .print-table td { padding: 8px; border: 1px solid #cbd5e1; color: #1e293b; font-weight: 600; }
+  
+  .print-flex-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+  .print-fare-box { flex: 1; }
+  .print-qr-box { width: 120px; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; padding: 10px; }
+  
+  .print-instructions { font-size: 10px; color: #475569; line-height: 1.5; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+  .print-instructions li { margin-bottom: 6px; }
+}
+.print-only { display: none; }
+@media(max-width:768px){.page{padding-top:80px;}.glass-card{padding:18px;}.j-row{gap:10px;}.j-time{font-size:1.2rem;}}
+/* Cancel Modal */
+.cancel-step { display: none; }
+.cancel-step.active { display: block; }
+.cancel-icon-big { font-size: 3.5rem; color: #ef4444; margin-bottom: 15px; text-align: center; }
+.cancel-icon-success { font-size: 4rem; color: #10b981; margin-bottom: 15px; text-align: center; animation: checkPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+@keyframes checkPop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.otp-input {
+  width: 100%; height: 50px; font-size: 1.5rem; font-weight: 800; text-align: center;
+  border: 2px solid rgba(108,99,255,.2); border-radius: 12px; background: rgba(108,99,255,.05);
+  letter-spacing: 5px; transition: all .2s;
+}
+.otp-input:focus { border-color: #6c63ff; background: #fff; box-shadow: 0 0 0 4px rgba(108,99,255,.1); outline: none; }
+</style>
+<link rel="stylesheet" href="common.css">
+</head>
+<body class="app-bg light-mode">
+<div id="universal-header"></div>
+<div class="hero-bg">
+  <div class="hero-blob blob1"></div>
+  <div class="hero-blob blob2"></div>
+  <div class="hero-blob blob3"></div>
+</div>
+
+<div class="container page">
+  <!-- Loading state -->
+  <div id="loading-state" class="glass-card loading-state">
+    <div class="loading-spin"></div>
+    <div style="font-size:1rem;font-weight:600;color:#64748b;">Loading your booking...</div>
+  </div>
+
+  <!-- Error state -->
+  <div id="error-state" class="glass-card text-center py-5" style="display:none;">
+    <i class="bi bi-exclamation-triangle-fill" style="font-size:3rem;color:#ef4444;"></i>
+    <h4 class="mt-3" style="color:#ef4444;">Booking Not Found</h4>
+    <p class="text-muted mt-2" id="error-msg">We couldn't load your booking details.</p>
+    <button class="btn-home mt-3" onclick="window.location.href='index.html'"><i class="bi bi-house-fill me-2"></i>Go Home</button>
+  </div>
+
+  <!-- Booking content -->
+  <div id="booking-content" style="display:none;">
+
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <!-- PNR -->
+        <div class="glass-card">
+          <div class="ticket-shell">
+            <div class="ticket-head">
+              <div>
+                <div class="ticket-title"><i class="bi bi-ticket-detailed-fill me-1"></i>RailGo E-Ticket</div>
+                <div class="ticket-meta">Valid travel document for your booked journey</div>
+              </div>
+              <span class="badge-paid"><i class="bi bi-check-circle-fill"></i><span id="conf-status-top">Confirmed</span></span>
+            </div>
+            <div class="pnr-box mt-3">
+              <div class="pnr-label">PNR Number</div>
+              <div class="pnr-value" id="conf-pnr">&mdash;</div>
+              <div style="font-size:.76rem;color:#64748b;">Show this PNR during checks</div>
+            </div>
+            <div class="ticket-strip">
+              <span class="ticket-pill" id="ticket-train-no">Train #---</span>
+              <span class="ticket-pill" id="ticket-class">Class ---</span>
+              <span class="ticket-pill" id="ticket-date">Date ---</span>
+            </div>
+            <div class="ticket-actions">
+              <button class="btn-ticket btn-ticket-primary" onclick="window.print()"><i class="bi bi-cloud-download-fill me-2"></i>Download Ticket</button>
+              <button class="btn-ticket btn-ticket-outline" style="border-color: #ef4444; color: #ef4444;" onclick="openCancelModal()"><i class="bi bi-x-circle-fill me-2"></i>Cancel Ticket</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Journey Details -->
+        <div class="glass-card">
+          <div class="sec-title"><i class="bi bi-geo-alt-fill"></i> Journey Details</div>
+          <div style="font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,#1a1a2e,#6c63ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;" id="conf-train-name">&mdash;</div>
+          <div class="j-row">
+            <div class="text-start">
+              <div class="j-time" id="conf-dep">--:--</div>
+              <div class="j-code" id="conf-src">SRC</div>
+            </div>
+            <div class="j-line"><i class="bi bi-train-front-fill"></i></div>
+            <div class="text-end">
+              <div class="j-time" id="conf-arr">--:--</div>
+              <div class="j-code" id="conf-dst">DST</div>
+            </div>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="bi bi-calendar3"></i>Date</span>
+            <span class="info-val" id="conf-date">&mdash;</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="bi bi-hash"></i>Train No.</span>
+            <span class="info-val" id="conf-train-num">&mdash;</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="bi bi-person-badge"></i>Class</span>
+            <span class="info-val" id="conf-class">&mdash;</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="bi bi-calendar2-check"></i>Booked On</span>
+            <span class="info-val" id="conf-booked-on">&mdash;</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="bi bi-patch-check-fill"></i>Status</span>
+            <span class="info-val"><span class="badge-paid"><i class="bi bi-check-circle-fill"></i><span id="conf-status">Confirmed</span></span></span>
+          </div>
+        </div>
+
+        <!-- Passengers -->
+        <div class="glass-card">
+          <div class="sec-title"><i class="bi bi-people-fill"></i> Passenger Details</div>
+          <div id="conf-pax-list">&mdash;</div>
+        </div>
+
+        <!-- Contact -->
+        <div class="glass-card">
+          <div class="sec-title"><i class="bi bi-envelope-fill"></i> Contact Details</div>
+          <div class="info-row">
+            <span class="info-label"><i class="bi bi-envelope"></i>Email</span>
+            <span class="info-val" id="conf-email">&mdash;</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="bi bi-telephone"></i>Phone</span>
+            <span class="info-val" id="conf-phone">&mdash;</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <!-- Payment Summary -->
+        <div class="glass-card" style="position:sticky;top:100px;">
+          <div class="sec-title"><i class="bi bi-receipt-cutoff"></i> Payment Summary</div>
+          <div class="pay-row">
+            <span class="pay-lbl">Payment Status</span>
+            <span class="badge-paid"><i class="bi bi-shield-check-fill"></i> PAID</span>
+          </div>
+          <div class="pay-row">
+            <span class="pay-lbl">Payment ID</span>
+            <span class="pay-val" id="conf-pay-id" style="font-size:.75rem;word-break:break-all;">&mdash;</span>
+          </div>
+          <div class="pay-total-row">
+            <span class="pay-total-lbl">Amount Paid</span>
+            <span class="pay-total-val">&#8377;<span id="conf-amount">0</span></span>
+          </div>
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(0,0,0,.06);">
+            <div style="font-size:.72rem;font-weight:700;color:#10b981;display:flex;align-items:center;gap:5px;margin-bottom:4px;">
+              <i class="bi bi-shield-fill-check"></i> Payment Verified by Razorpay
+            </div>
+            <div style="font-size:.72rem;color:#64748b;">Your transaction is secure and verified.</div>
+          </div>
+
+          <!-- Actions -->
+          <div class="d-flex flex-column gap-3 mt-4">
+            <button class="btn-home" onclick="window.location.href='index.html'">
+              <i class="bi bi-house-fill me-2"></i>Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /booking-content -->
+</div>
+
+<script>
+function formatDate(d) {
+  if (!d) return '&mdash;';
+  return new Date(d).toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+}
+function formatDateTime(d) {
+  if (!d) return '&mdash;';
+  return new Date(d).toLocaleString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+async function loadBooking() {
+  const params = new URLSearchParams(window.location.search);
+  const pnr = params.get('pnr');
+
+  if (!pnr) {
+    showError('No PNR provided.');
+    return;
+  }
+
+  try {
+    const b = await apiRequest(`/api/pnr-status/check/${pnr}`);
+    populateBooking(b);
+  } catch (err) {
+    showError(err.message || 'Could not load booking. Please check My Bookings.');
+  }
+}
+
+function populateBooking(b) {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('booking-content').style.display = 'block';
+
+  const train = b.train_instance?.train;
+  const src   = train?.source_station;
+  const dst   = train?.destination_station;
+
+  document.getElementById('conf-pnr').textContent          = b.pnr || '&mdash;';
+  document.getElementById('conf-train-name').textContent    = train?.name || '&mdash;';
+  document.getElementById('conf-train-num').textContent     = train?.train_number ? `#${train.train_number}` : '&mdash;';
+  document.getElementById('conf-dep').textContent           = train?.departure_time || '--:--';
+  document.getElementById('conf-arr').textContent           = train?.arrival_time   || '--:--';
+  document.getElementById('conf-src').textContent           = (src?.code || 'SRC').toUpperCase();
+  document.getElementById('conf-dst').textContent           = (dst?.code || 'DST').toUpperCase();
+  document.getElementById('conf-date').textContent          = formatDate(b.train_instance?.journey_date);
+  document.getElementById('conf-class').textContent         = b.train_class?.class_master?.name || b.train_class?.class_master?.code || '&mdash;';
+  document.getElementById('conf-booked-on').textContent     = formatDateTime(b.booking_date);
+  const status = b.status || 'Confirmed';
+  const isCancelled = status.toUpperCase() === 'CANCELLED';
+
+  document.getElementById('conf-status').textContent        = status;
+  document.getElementById('conf-status-top').textContent    = status;
+
+  if (isCancelled) {
+    const badges = document.querySelectorAll('.badge-paid');
+    badges.forEach(badge => {
+      badge.style.background = 'rgba(239, 68, 68, 0.12)';
+      badge.style.color = '#ef4444';
+      badge.style.borderColor = 'rgba(239, 68, 68, 0.25)';
+      badge.innerHTML = '<i class="bi bi-x-circle-fill"></i> CANCELLED';
+    });
+    const cancelBtn = document.querySelector('button[onclick="openCancelModal()"]');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+  }
+
+  document.getElementById('conf-email').textContent         = b.contact_email || '&mdash;';
+  document.getElementById('conf-phone').textContent         = b.contact_phone || '&mdash;';
+  document.getElementById('conf-amount').textContent        = b.total_amount?.toFixed(2) || '0.00';
+  document.getElementById('conf-pay-id').textContent        = b.razorpay_payment_id || b.razorpay_order_id || '&mdash;';
+  document.getElementById('ticket-train-no').textContent    = train?.train_number ? `Train #${train.train_number}` : 'Train #---';
+  const ticketClass = b.train_class?.class_master?.code || b.train_class?.class_master?.name || '---';
+  document.getElementById('ticket-class').textContent       = `Class ${ticketClass}`;
+  document.getElementById('ticket-date').textContent        = `Date ${formatDate(b.train_instance?.journey_date)}`;
+
+  // Passengers
+  const paxEl = document.getElementById('conf-pax-list');
+  if (b.passengers?.length) {
+    paxEl.innerHTML = b.passengers.map((p, i) => `
+      <div class="pax-row">
+        <div class="pax-avatar">${p.name.charAt(0).toUpperCase()}</div>
+        <div>
+          <div class="pax-name">${p.name}</div>
+          <div class="pax-meta">${p.age} yrs &middot; ${p.gender} &middot; Passenger ${i+1}${p.seat_number ? ' &middot; Seat '+p.seat_number : ''}</div>
+        </div>
+      </div>`).join('');
+  } else {
+    paxEl.innerHTML = '<div class="text-muted">No passenger data.</div>';
+  }
+
+  // Populate Print Template
+  if (document.getElementById('print-pnr')) {
+    document.getElementById('print-pnr').textContent = b.pnr || '--';
+    document.getElementById('print-train').textContent = train ? `${train.train_number} / ${train.name}` : '--';
+    document.getElementById('print-class').textContent = ticketClass;
+    document.getElementById('print-book-date').textContent = formatDateTime(b.booking_date);
+    
+    document.getElementById('print-src-name').textContent = src?.name || 'SRC';
+    document.getElementById('print-dep-time').textContent = `Departure: ${train?.departure_time || '--:--'} ${formatDate(b.train_instance?.journey_date)}`;
+    
+    document.getElementById('print-dst-name').textContent = dst?.name || 'DST';
+    document.getElementById('print-arr-time').textContent = `Arrival: ${train?.arrival_time || '--:--'} ${formatDate(b.train_instance?.journey_date)}`;
+    
+    document.getElementById('print-tx-id').textContent = b.razorpay_payment_id || b.razorpay_order_id || '--';
+    
+    // Generate QR Code
+    const qrData = encodeURIComponent(`PNR: ${b.pnr || '--'}\nFrom: ${src?.name || 'SRC'}\nTo: ${dst?.name || 'DST'}`);
+    document.getElementById('print-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrData}`;
+    
+    const totalFare = b.total_amount || 0;
+    const convFee = 35.40; 
+    const baseFare = Math.max(0, totalFare - convFee);
+    
+    document.getElementById('print-fare-base').textContent = `₹ ${baseFare.toFixed(2)}`;
+    document.getElementById('print-fare-total').textContent = `₹ ${totalFare.toFixed(2)}`;
+
+    const printPaxBody = document.getElementById('print-pax-body');
+    if (b.passengers?.length) {
+      printPaxBody.innerHTML = b.passengers.map((p, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${p.name}</td>
+          <td>${p.age}</td>
+          <td>${p.gender}</td>
+          <td>${isCancelled ? 'CANCELLED' : 'CNF/GN'}</td>
+          <td style="font-weight:800;">${isCancelled ? 'CANCELLED' : 'CNF/GN'}${p.seat_number ? ' ('+p.seat_number+')' : ''}</td>
+        </tr>
+      `).join('');
+    } else {
+      printPaxBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No passenger data</td></tr>';
+    }
+  }
+}
+
+function showError(msg) {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('error-state').style.display = 'block';
+  document.getElementById('error-msg').textContent = msg;
+}
+
+// Cancellation Flow
+function openCancelModal() {
+  document.getElementById('cancel-backdrop').classList.add('active');
+  document.getElementById('cancel-step-1').classList.add('active');
+  document.getElementById('cancel-step-2').classList.remove('active');
+  document.getElementById('cancel-step-3').classList.remove('active');
+  if(document.getElementById('cancel-otp-error')) document.getElementById('cancel-otp-error').style.display = 'none';
+}
+function closeCancelModal() {
+  document.getElementById('cancel-backdrop').classList.remove('active');
+}
+
+async function sendCancelOTP() {
+  const btn = document.getElementById('btn-send-cancel-otp');
+  const pnr = _confParams.get('pnr');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+
+  try {
+    await apiRequest(`/api/pnr-status/${pnr}/cancel-otp`, { method: 'POST' });
+    document.getElementById('cancel-step-1').classList.remove('active');
+    document.getElementById('cancel-step-2').classList.add('active');
+    setTimeout(() => document.getElementById('cancel-otp-input')?.focus(), 200);
+  } catch (err) {
+    alert(err.message || 'Failed to send OTP. Please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-envelope-fill me-2"></i>Send OTP to Email';
+  }
+}
+
+async function confirmCancellation() {
+  const otp = document.getElementById('cancel-otp-input').value.trim();
+  const errEl = document.getElementById('cancel-otp-error');
+  const btn = document.getElementById('btn-confirm-cancel');
+  const pnr = _confParams.get('pnr');
+
+  if (otp.length !== 6) {
+    if(errEl) { errEl.textContent = 'Please enter the 6-digit OTP.'; errEl.style.display = 'block'; }
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Cancelling...';
+
+  try {
+    await apiRequest(`/api/pnr-status/${pnr}/cancel-confirm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ otp })
+    });
+    
+    document.getElementById('cancel-step-2').classList.remove('active');
+    document.getElementById('cancel-step-3').classList.add('active');
+    
+    // Wait for animation then redirect
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 2500);
+  } catch (err) {
+    if(errEl) { errEl.textContent = err.message || 'Invalid OTP or cancellation failed.'; errEl.style.display = 'block'; }
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>Confirm Cancellation';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadBooking);
+</script>
+
+<!-- Cancel Modal -->
+<div class="auth-backdrop" id="cancel-backdrop">
+  <div class="auth-modal" style="width: min(450px, 94vw);">
+    <button class="auth-close" onclick="closeCancelModal()">&times;</button>
+    <div class="auth-header">
+      <div class="auth-header-logo" style="color:#ef4444;"><i class="bi bi-x-circle-fill"></i> Cancel Ticket</div>
+    </div>
+    <div class="auth-body">
+      <!-- Step 1: Warning -->
+      <div id="cancel-step-1" class="cancel-step active">
+        <div class="cancel-icon-big" style="color: #64748b;"><i class="bi bi-question-circle-fill"></i></div>
+        <h5 class="fw-bold text-center">Confirm Cancellation</h5>
+        <p class="text-muted small text-center">Would you like to cancel your ticket? Your booking status will be updated to <b>CANCELLED</b> in our system.</p>
+        <div class="alert alert-info py-2 px-3 mb-4 mt-3" style="font-size:0.8rem; border-radius:10px; background: rgba(108,99,255,0.05); border-color: rgba(108,99,255,0.1); color: #6c63ff;">
+          <i class="bi bi-info-circle-fill me-2"></i> We'll send an OTP to your contact email for verification.
+        </div>
+        <button class="btn-home w-100" id="btn-send-cancel-otp" onclick="sendCancelOTP()">
+          <i class="bi bi-envelope-fill me-2"></i>Send OTP to Email
+        </button>
+      </div>
+
+      <!-- Step 2: OTP -->
+      <div id="cancel-step-2" class="cancel-step">
+        <div class="text-center mb-4">
+          <i class="bi bi-shield-lock-fill" style="font-size:3rem; color:#6c63ff;"></i>
+          <h5 class="fw-bold mt-2">Verify Cancellation</h5>
+          <p class="text-muted small">Enter the 6-digit code sent to your email.</p>
+        </div>
+        <div id="cancel-otp-error" class="auth-error mb-3" style="display:none;"></div>
+        <div class="otp-container mb-4">
+          <input type="text" id="cancel-otp-input" class="otp-input" maxlength="6" placeholder="------" />
+        </div>
+        <button class="btn-home w-100" id="btn-confirm-cancel" onclick="confirmCancellation()" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
+          <i class="bi bi-check-circle-fill me-2"></i>Confirm Cancellation
+        </button>
+        <p class="text-center mt-3 small text-muted">Didn't get the code? <a href="#" onclick="sendCancelOTP(); return false;" class="text-decoration-none fw-bold" style="color:#6c63ff;">Resend</a></p>
+      </div>
+
+      <!-- Step 3: Success Animation -->
+      <div id="cancel-step-3" class="cancel-step">
+        <div class="cancel-icon-success"><i class="bi bi-check-circle-fill"></i></div>
+        <h5 class="fw-bold text-center">Ticket Cancelled!</h5>
+        <p class="text-muted small text-center">Your request has been processed successfully. Redirecting you home...</p>
+        <div class="text-center mt-4">
+           <div class="spinner-border spinner-border-sm text-success"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Print Template -->
+<div id="print-template" class="print-only">
+  <div class="print-container">
+    <div class="print-header">
+      <div class="print-logo"><i class="bi bi-train-front-fill"></i> RailGo</div>
+      <div class="print-title">Electronic Reservation Slip (ERS)</div>
+    </div>
+    
+    <div class="print-journey-box">
+      <div class="print-station">
+        <div style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-bottom: 5px;">Booked From</div>
+        <div class="print-station-name" id="print-src-name">--</div>
+        <div class="print-station-date" id="print-dep-time">--</div>
+      </div>
+      <div class="print-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
+      <div class="print-station">
+        <div style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-bottom: 5px;">To</div>
+        <div class="print-station-name" id="print-dst-name">--</div>
+        <div class="print-station-date" id="print-arr-time">--</div>
+      </div>
+    </div>
+
+    <div class="print-grid">
+      <div class="print-data-item">
+        <div class="print-data-lbl">PNR</div>
+        <div class="print-pnr-val" id="print-pnr">--</div>
+      </div>
+      <div class="print-data-item">
+        <div class="print-data-lbl">Train No./Name</div>
+        <div class="print-data-val" id="print-train">--</div>
+      </div>
+      <div class="print-data-item">
+        <div class="print-data-lbl">Class</div>
+        <div class="print-data-val" id="print-class">--</div>
+      </div>
+      <div class="print-data-item">
+        <div class="print-data-lbl">Quota</div>
+        <div class="print-data-val">GENERAL (GN)</div>
+      </div>
+      <div class="print-data-item">
+        <div class="print-data-lbl">Distance</div>
+        <div class="print-data-val">120 KM</div>
+      </div>
+      <div class="print-data-item">
+        <div class="print-data-lbl">Booking Date</div>
+        <div class="print-data-val" id="print-book-date">--</div>
+      </div>
+    </div>
+
+    <div class="print-section-title">Passenger Details</div>
+    <table class="print-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Age</th>
+          <th>Gender</th>
+          <th>Booking Status</th>
+          <th>Current Status</th>
+        </tr>
+      </thead>
+      <tbody id="print-pax-body">
+        <!-- Rows injected via JS -->
+      </tbody>
+    </table>
+
+    <div class="print-flex-row">
+      <div class="print-fare-box">
+        <div class="print-section-title" style="margin-top: 0;">Payment Details</div>
+        <table class="print-table" style="width: 90%; border: none;">
+          <tbody>
+            <tr>
+              <td style="background: transparent; border: none; padding: 4px 0; color: #475569;">Ticket Fare</td>
+              <td style="background: transparent; border: none; padding: 4px 0; text-align: right;" id="print-fare-base">--</td>
+            </tr>
+            <tr>
+              <td style="background: transparent; border: none; padding: 4px 0; color: #475569;">Convenience Fee (Incl. of GST)</td>
+              <td style="background: transparent; border: none; padding: 4px 0; text-align: right;">₹ 35.40</td>
+            </tr>
+            <tr>
+              <td style="background: transparent; border: none; padding: 8px 0 4px 0; font-weight: 800; font-size: 14px; border-top: 1px dashed #cbd5e1; margin-top: 4px;">Total Fare (all inclusive)</td>
+              <td style="background: transparent; border: none; padding: 8px 0 4px 0; text-align: right; font-weight: 800; font-size: 14px; border-top: 1px dashed #cbd5e1; margin-top: 4px;" id="print-fare-total">--</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="background: transparent; border: none; padding: 15px 0 0 0; color: #64748b; font-size: 10px;">Transaction ID: <span id="print-tx-id" style="font-weight: 700; color: #1e293b;">--</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="print-qr-box">
+        <img id="print-qr-img" src="" style="width:100%; height:100%; object-fit:contain;" alt="QR Code">
+        <div style="font-size: 9px; color: #64748b; margin-top: 5px; text-align: center; text-transform: uppercase; font-weight: 700;">Scan to verify</div>
+      </div>
+    </div>
+
+    <div class="print-instructions">
+      <div style="font-weight: 800; color: #1e293b; margin-bottom: 8px; font-size: 12px; text-decoration: underline;">INSTRUCTIONS:</div>
+      <ol style="padding-left: 15px; margin: 0;">
+        <li>Prescribed Original ID proofs are: Voter Identity Card / Passport / PAN Card / Driving License / Photo ID card issued by Central / State Govt.</li>
+        <li>This ticket is booked on a personal User ID and its sale/purchase is an offence u/s 143 of the Railways Act, 1989.</li>
+        <li>Passengers travelling on a fully waitlisted e-ticket will be treated as Ticketless.</li>
+        <li>For any assistance, use only the official Customer Care number: 14646. Beware of fraudulent customer care numbers.</li>
+        <li>The printed Departure and Arrival Times are liable to change. Please check correct departure, arrival from Railway Station Enquiry.</li>
+        <li>As per RBI guidelines, the refund of Ticket should be given in the same Bank account, which was used for booking.</li>
+      </ol>
+      
+      <div style="margin-top: 20px; padding: 15px; background: rgba(108,99,255,0.05); border: 1px dashed rgba(108,99,255,0.3); border-radius: 8px; text-align: center; color: #6c63ff; font-weight: 700; font-size: 12px;">
+        <i class="bi bi-shield-check"></i> Enjoy Ticket Booking with RailGo - Safe, Fast, and Reliable!
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

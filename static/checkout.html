@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Review & Pay - RailGo</title>
+<script src="common.js?v=4"></script>
+<script>
+const _flowGuard = JSON.parse(sessionStorage.getItem('railgo_flow_v1') || '{}');
+if (!sessionStorage.getItem('rg_booking') && !_flowGuard.selection) {
+  window.location.replace('index.html');
+}
+</script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
+.hero-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.hero-blob{position:absolute;border-radius:50%;filter:blur(80px);animation:blobFloat 12s ease-in-out infinite alternate;}
+.blob1{width:500px;height:500px;background:radial-gradient(circle,#6c63ff,#3b82f6);top:-120px;left:-100px;opacity:.35;}
+.blob2{width:400px;height:400px;background:radial-gradient(circle,#f472b6,#fb923c);bottom:-80px;right:-80px;opacity:.28;animation-delay:-4s;}
+.blob3{width:280px;height:280px;background:radial-gradient(circle,#34d399,#06b6d4);top:60%;left:60%;opacity:.22;animation-delay:-8s;}
+.dark-mode .blob1{opacity:.22;}.dark-mode .blob2{opacity:.18;}.dark-mode .blob3{opacity:.15;}
+@keyframes blobFloat{0%{transform:translate(0,0) scale(1);}50%{transform:translate(25px,20px) scale(1.04);}100%{transform:translate(-15px,25px) scale(.97);}}
+.page{position:relative;z-index:1;padding-top:90px;padding-bottom:50px;}
+.glass-card{background:rgba(255,255,255,0.78);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.9);border-radius:18px;box-shadow:0 8px 32px rgba(0,0,0,.08);padding:24px 28px;margin-bottom:20px;}
+.dark-mode .glass-card{background:rgba(15,20,40,0.85);border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 32px rgba(0,0,0,.4);}
+/* Journey card */
+.journey-arc{display:flex;align-items:center;gap:16px;padding:16px 0;}
+.j-time{font-size:1.5rem;font-weight:800;color:#1a1a2e;line-height:1;}
+.dark-mode .j-time{color:#f1f5f9;}
+.j-code{font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;}
+.j-line{flex:1;position:relative;height:2px;background:linear-gradient(90deg,#6c63ff,#f472b6);border-radius:2px;}
+.j-line i{position:absolute;top:-9px;left:50%;transform:translateX(-50%);color:#6c63ff;font-size:1rem;}
+.j-dur{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:.72rem;font-weight:700;color:#6c63ff;white-space:nowrap;}
+.train-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(108,99,255,.1);border:1px solid rgba(108,99,255,.2);border-radius:20px;padding:4px 12px;font-size:.78rem;color:#6c63ff;font-weight:600;}
+.dark-mode .train-badge{background:rgba(165,180,252,.1);border-color:rgba(165,180,252,.2);color:#a5b4fc;}
+/* Section title */
+.sec-title{font-size:1rem;font-weight:700;color:#1a1a2e;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.sec-title i{color:#6c63ff;}
+.dark-mode .sec-title{color:#f1f5f9;}
+/* Passenger pill */
+.pax-card{background:rgba(108,99,255,.06);border:1px solid rgba(108,99,255,.15);border-radius:12px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;}
+.dark-mode .pax-card{background:rgba(165,180,252,.06);border-color:rgba(165,180,252,.15);}
+.pax-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#6c63ff,#f472b6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem;flex-shrink:0;}
+.pax-name{font-weight:700;color:#1a1a2e;font-size:.93rem;}
+.dark-mode .pax-name{color:#f1f5f9;}
+.pax-meta{font-size:.78rem;color:#64748b;}
+.dark-mode .pax-meta{color:#94a3b8;}
+/* Payment breakdown */
+.pay-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:.9rem;}
+.dark-mode .pay-row{border-bottom-color:rgba(255,255,255,.06);}
+.pay-row:last-of-type{border-bottom:none;}
+.pay-label{color:#64748b;}
+.dark-mode .pay-label{color:#94a3b8;}
+.pay-value{font-weight:600;color:#1a1a2e;}
+.dark-mode .pay-value{color:#f1f5f9;}
+.pay-total{display:flex;justify-content:space-between;align-items:center;padding:14px 0 0;margin-top:4px;border-top:2px solid rgba(108,99,255,.2);}
+.pay-total-label{font-weight:700;font-size:1rem;color:#1a1a2e;}
+.dark-mode .pay-total-label{color:#f1f5f9;}
+.pay-total-amt{font-size:1.6rem;font-weight:800;background:linear-gradient(135deg,#6c63ff,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+/* Pay button */
+.btn-pay{background:linear-gradient(135deg, #007BFF, #FF69B4);color:#fff;padding:15px 28px;border-radius:14px;border:none;font-weight:700;font-size:1.05rem;width:100%;cursor:pointer;transition:all .25s;box-shadow:0 6px 20px rgba(108,99,255,.35);display:flex;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden;}
+.btn-pay::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:translateX(-100%);transition:transform .5s;}
+.btn-pay:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(108,99,255,.5);}
+.btn-pay:hover::after{transform:translateX(100%);}
+.btn-pay:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.rzp-logo{font-size:.72rem;color:#64748b;display:flex;align-items:center;gap:6px;justify-content:center;margin-top:10px;}
+.dark-mode .rzp-logo{color:#94a3b8;}
+/* Loader */
+.pay-loader{display:none;position:fixed;inset:0;background:rgba(15,20,40,.6);backdrop-filter:blur(8px);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.pay-loader.show{display:flex;}
+.spin{width:48px;height:48px;border:4px solid rgba(255,255,255,.2);border-top-color:#6c63ff;border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spin-text{color:#fff;font-weight:600;}
+/* Step bar */
+.step-bar{display:flex;align-items:center;gap:0;}
+.step-item{display:flex;align-items:center;gap:6px;font-size:.8rem;font-weight:600;}
+.step-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;}
+.s-done .step-dot{background:#10b981;color:#fff;}
+.s-active .step-dot{background:#6c63ff;color:#fff;}
+.s-inactive .step-dot{background:rgba(0,0,0,.1);color:#94a3b8;}
+.step-line{flex:1;height:2px;margin:0 6px;background:rgba(0,0,0,.08);}
+.dark-mode .step-line{background:rgba(255,255,255,.1);}
+.s-done .step-lbl{color:#10b981;}.s-active .step-lbl{color:#6c63ff;}.s-inactive .step-lbl{color:#94a3b8;}
+.back-btn{background:rgba(108,99,255,.1);border:1.5px solid rgba(108,99,255,.25);color:#6c63ff;border-radius:10px;padding:7px 16px;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .2s;}
+.back-btn:hover{background:rgba(108,99,255,.2);}
+.dark-mode .back-btn{color:#a5b4fc;}
+/* Info box */
+.info-note{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:10px 14px;font-size:.82rem;color:#059669;display:flex;align-items:center;gap:8px;margin-top:14px;}
+.dark-mode .info-note{background:rgba(16,185,129,.12);color:#34d399;}
+@media(max-width:768px){.page{padding-top:80px;}.glass-card{padding:18px;}}
+</style>
+<link rel="stylesheet" href="common.css">
+</head>
+<body class="app-bg light-mode">
+<div id="universal-header"></div>
+<div class="hero-bg">
+  <div class="hero-blob blob1"></div>
+  <div class="hero-blob blob2"></div>
+  <div class="hero-blob blob3"></div>
+</div>
+
+<!-- Pay Loader -->
+<div class="pay-loader" id="pay-loader">
+  <div class="spin"></div>
+  <div class="spin-text" id="loader-text">Processing payment...</div>
+</div>
+
+<div class="container page">
+  <!-- Step bar -->
+  <div class="glass-card mb-3 py-3">
+    <div class="step-bar">
+      <div class="step-item s-done"><div class="step-dot"><i class="bi bi-check2"></i></div><span class="step-lbl">Select Train</span></div>
+      <div class="step-line"></div>
+      <div class="step-item s-done"><div class="step-dot"><i class="bi bi-check2"></i></div><span class="step-lbl">Passengers</span></div>
+      <div class="step-line"></div>
+      <div class="step-item s-active"><div class="step-dot">3</div><span class="step-lbl">Review & Pay</span></div>
+      <div class="step-line"></div>
+      <div class="step-item s-inactive"><div class="step-dot">4</div><span class="step-lbl">Confirmation</span></div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- LEFT: Train + Passengers -->
+    <div class="col-lg-7">
+      <!-- Journey Card -->
+      <div class="glass-card">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <div style="font-size:1.2rem;font-weight:800;background:linear-gradient(135deg,#1a1a2e,#6c63ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;" id="co-train-name">Loading...</div>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              <span class="train-badge"><i class="bi bi-hash"></i><span id="co-train-num">#---</span></span>
+              <span class="train-badge"><i class="bi bi-calendar3"></i><span id="co-date">---</span></span>
+              <span class="train-badge"><i class="bi bi-person-badge"></i><span id="co-class">---</span></span>
+            </div>
+          </div>
+          <button class="back-btn" onclick="window.history.back()"><i class="bi bi-arrow-left me-1"></i>Back</button>
+        </div>
+        <div class="journey-arc">
+          <div class="text-start">
+            <div class="j-time" id="co-dep">--:--</div>
+            <div class="j-code" id="co-src">SRC</div>
+          </div>
+          <div class="j-line" style="margin-bottom:10px;">
+            <i class="bi bi-train-front-fill"></i>
+            <span class="j-dur" id="co-dur">--h --m</span>
+          </div>
+          <div class="text-end">
+            <div class="j-time" id="co-arr">--:--</div>
+            <div class="j-code" id="co-dst">DST</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Passengers -->
+      <div class="glass-card">
+        <div class="sec-title"><i class="bi bi-people-fill"></i> Passengers</div>
+        <div id="co-pax-list">
+          <div class="text-center text-muted py-3"><div class="spinner-border spinner-border-sm me-2"></div>Loading passengers...</div>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="glass-card">
+        <div class="sec-title"><i class="bi bi-envelope-fill"></i> Contact Details</div>
+        <div class="row g-2">
+          <div class="col-6">
+            <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;">Email</div>
+            <div style="font-weight:600;color:#1a1a2e;margin-top:4px;" id="co-email" class="dark-theme-text">—</div>
+          </div>
+          <div class="col-6">
+            <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;">Phone</div>
+            <div style="font-weight:600;color:#1a1a2e;margin-top:4px;" id="co-phone" class="dark-theme-text">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Payment Breakdown + Pay Button -->
+    <div class="col-lg-5">
+      <div class="glass-card" style="position:sticky;top:100px;">
+        <div class="sec-title"><i class="bi bi-receipt-cutoff"></i> Payment Summary</div>
+
+        <!-- Loading state -->
+        <div id="pay-loading" class="text-center py-4">
+          <div class="spinner-border" style="color:#6c63ff;width:28px;height:28px;border-width:3px;"></div>
+          <div class="mt-2" style="font-size:.85rem;color:#64748b;">Calculating fare...</div>
+        </div>
+
+        <!-- Breakdown (hidden until loaded) -->
+        <div id="pay-breakdown" style="display:none;">
+          <div class="pay-row">
+            <span class="pay-label">Base Fare (<span id="br-pax-count">1</span> pax × ₹<span id="br-fare-each">0</span>)</span>
+            <span class="pay-value">₹<span id="br-base">0</span></span>
+          </div>
+          <div class="pay-row">
+            <span class="pay-label">Convenience Fee</span>
+            <span class="pay-value">₹<span id="br-conv">30</span></span>
+          </div>
+          <div class="pay-row">
+            <span class="pay-label">GST (5%)</span>
+            <span class="pay-value">₹<span id="br-gst">0</span></span>
+          </div>
+          <div class="pay-total">
+            <span class="pay-total-label">Total Amount</span>
+            <span class="pay-total-amt">₹<span id="br-total">0</span></span>
+          </div>
+
+          <button class="btn-pay mt-4" id="pay-btn" onclick="initiatePayment()">
+            <i class="bi bi-shield-lock-fill"></i>
+            Pay ₹<span id="pay-btn-amt">0</span> with Razorpay
+          </button>
+
+          <div class="rzp-logo">
+            <i class="bi bi-shield-check-fill" style="color:#6c63ff;"></i>
+            100% Secure · Powered by Razorpay
+          </div>
+
+          <div class="info-note">
+            <i class="bi bi-info-circle-fill"></i>
+            Booking confirmed only after successful payment
+          </div>
+        </div>
+
+        <div id="pay-error" style="display:none;" class="alert alert-danger mt-3 rounded-3 fw-bold"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let bookingData = null;
+let razorpayOrderId = null;
+let razorpayKeyId = null;
+let totalAmount = 0;
+
+// ── Init ───────────────────────────────────────────────────────────────────
+function getUrlParams() {
+  const p = new URLSearchParams(window.location.search);
+  const flow = FlowState.read();
+  const selection = flow.selection || {};
+  return {
+    train: p.get('train') || selection.train,
+    trainName: p.get('trainName') || selection.trainName,
+    source: p.get('source') || selection.source,
+    destination: p.get('destination') || selection.destination,
+    date: p.get('date') || selection.date,
+    classType: p.get('classType') || selection.classType,
+    departureTime: p.get('departureTime') || selection.departureTime,
+    arrivalTime: p.get('arrivalTime') || selection.arrivalTime
+  };
+}
+
+function calcDuration(dep, arr) {
+  if (!dep || !arr) return "--h --m";
+  const [dh,dm] = dep.split(':').map(Number);
+  const [ah,am] = arr.split(':').map(Number);
+  let h = ah-dh, m = am-dm;
+  if (m<0){h--;m+=60;} if(h<0)h+=24;
+  return `${h}h ${m}m`;
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+}
+
+function populatePage() {
+  const flow = FlowState.read();
+  const stored = sessionStorage.getItem('rg_booking') || JSON.stringify({
+    ...(flow.selection || {}),
+    passengers: flow.passengers || [],
+    contactDetails: flow.contactDetails || {}
+  });
+  if (!stored) { window.location.href = 'index.html'; return; }
+  bookingData = JSON.parse(stored);
+
+  const p = getUrlParams();
+
+  // Train info
+  document.getElementById('co-train-name').textContent = p.trainName || bookingData.trainName || '—';
+  document.getElementById('co-train-num').textContent = p.train ? `#${p.train}` : '—';
+  document.getElementById('co-date').textContent = formatDate(p.date || bookingData.date);
+  document.getElementById('co-class').textContent = (p.classType || bookingData.classType) + ' Class';
+  document.getElementById('co-dep').textContent = p.departureTime || bookingData.departureTime || '--:--';
+  document.getElementById('co-arr').textContent = p.arrivalTime || bookingData.arrivalTime || '--:--';
+  document.getElementById('co-src').textContent = (p.source || bookingData.source || 'SRC').toUpperCase();
+  document.getElementById('co-dst').textContent = (p.destination || bookingData.destination || 'DST').toUpperCase();
+  document.getElementById('co-dur').textContent = calcDuration(p.departureTime || bookingData.departureTime, p.arrivalTime || bookingData.arrivalTime);
+  document.getElementById('co-email').textContent = bookingData.contactDetails?.email || '—';
+  document.getElementById('co-phone').textContent = bookingData.contactDetails?.phone || '—';
+
+  // Passengers
+  const pax = bookingData.passengers || [];
+  const paxList = document.getElementById('co-pax-list');
+  if (pax.length === 0) {
+    paxList.innerHTML = '<div class="text-muted text-center py-2">No passengers found.</div>';
+  } else {
+    paxList.innerHTML = pax.map((p, i) => `
+      <div class="pax-card">
+        <div class="pax-avatar">${p.name.charAt(0).toUpperCase()}</div>
+        <div>
+          <div class="pax-name">${p.name}</div>
+          <div class="pax-meta">${p.age} yrs · ${p.gender} · Passenger ${i+1}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  // Fetch order from backend
+  fetchOrder(p.train || bookingData.train, p.date || bookingData.date,
+             p.classType || bookingData.classType, pax.length);
+}
+
+// ── Create Razorpay order ──────────────────────────────────────────────────
+async function fetchOrder(trainNumber, date, classType, passengerCount) {
+  try {
+    const data = await apiRequest('/api/bookings/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ trainNumber, date, classType, passengerCount })
+    });
+
+    razorpayOrderId = data.order_id;
+    razorpayKeyId   = data.key_id;
+    totalAmount     = data.amount;
+
+    // Update breakdown UI
+    const fareEach = Math.round(data.base_fare / passengerCount);
+    document.getElementById('br-pax-count').textContent = passengerCount;
+    document.getElementById('br-fare-each').textContent = fareEach;
+    document.getElementById('br-base').textContent = data.base_fare.toFixed(0);
+    document.getElementById('br-conv').textContent = data.conv_fee.toFixed(0);
+    document.getElementById('br-gst').textContent = data.gst.toFixed(0);
+    document.getElementById('br-total').textContent = data.amount.toFixed(0);
+    document.getElementById('pay-btn-amt').textContent = data.amount.toFixed(0);
+
+    document.getElementById('pay-loading').style.display = 'none';
+    document.getElementById('pay-breakdown').style.display = 'block';
+
+  } catch (err) {
+    document.getElementById('pay-loading').style.display = 'none';
+    const errEl = document.getElementById('pay-error');
+    errEl.style.display = 'block';
+    errEl.textContent = '⚠ ' + (err.message || 'Could not load pricing. Please go back and try again.');
+  }
+}
+
+// ── Initiate Razorpay payment ──────────────────────────────────────────────
+function initiatePayment() {
+  if (!razorpayOrderId) return alert('Order not ready. Please wait.');
+
+  const p = bookingData;
+  const primaryPax = p.passengers?.[0] || {};
+
+  const options = {
+    key: razorpayKeyId,
+    amount: Math.round(totalAmount * 100),
+    currency: 'INR',
+    name: 'RailGo',
+    description: `${(p.source||'').toUpperCase()} → ${(p.destination||'').toUpperCase()} · ${p.classType} Class`,
+    order_id: razorpayOrderId,
+    image: 'https://img.icons8.com/?size=96&id=19285&format=png',
+    handler: function(response) {
+      // Payment captured — verify and save booking
+      showLoader('Saving your booking...');
+      verifyAndSaveBooking(response);
+    },
+    prefill: {
+      name: primaryPax.name || '',
+      email: p.contactDetails?.email || '',
+      contact: p.contactDetails?.phone || ''
+    },
+    theme: { color: '#6c63ff' },
+    modal: {
+      ondismiss: function() { hideLoader(); },
+      animation: true
+    },
+    notes: {
+      train_number: p.train,
+      class: p.classType,
+      journey_date: p.date
+    }
+  };
+
+  hideLoader();
+  const rzp = new Razorpay(options);
+  rzp.on('payment.failed', function(resp) {
+    hideLoader();
+    alert('Payment failed: ' + (resp.error?.description || 'Unknown error'));
+  });
+  rzp.open();
+}
+
+// ── Verify payment + save booking ─────────────────────────────────────────
+async function verifyAndSaveBooking(rzpResponse) {
+  const p = bookingData;
+  try {
+    const result = await apiRequest('/api/bookings/verify-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        razorpay_order_id:   rzpResponse.razorpay_order_id,
+        razorpay_payment_id: rzpResponse.razorpay_payment_id,
+        razorpay_signature:  rzpResponse.razorpay_signature,
+        trainNumber:   p.train,
+        date:          p.date,
+        classType:     p.classType,
+        passengers:    p.passengers,
+        contactDetails: p.contactDetails
+      })
+    });
+    if (result.success && result.bookingId) {
+      FlowState.write({
+        step: 'confirmed',
+        payment: {
+          razorpayOrderId: rzpResponse.razorpay_order_id,
+          razorpayPaymentId: rzpResponse.razorpay_payment_id,
+        },
+        confirmation: { bookingId: result.bookingId, pnr: result.pnr }
+      });
+      sessionStorage.removeItem('rg_booking');
+      window.location.href = `confirmation.html?bookingId=${result.bookingId}&pnr=${result.pnr}`;
+    } else {
+      hideLoader();
+      alert('Payment successful but booking save failed. Payment ID: ' + rzpResponse.razorpay_payment_id);
+    }
+  } catch (err) {
+    hideLoader();
+    alert('Error saving booking. Payment ID: ' + rzpResponse.razorpay_payment_id + '. Please contact support.');
+  }
+}
+
+function showLoader(msg) {
+  document.getElementById('loader-text').textContent = msg || 'Processing...';
+  document.getElementById('pay-loader').classList.add('show');
+}
+function hideLoader() { document.getElementById('pay-loader').classList.remove('show'); }
+
+document.addEventListener('DOMContentLoaded', populatePage);
+</script>
+</body>
+</html>

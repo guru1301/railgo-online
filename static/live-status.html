@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Live Train Status - RailGo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            color: #333;
+            padding-top: 80px;
+            padding-bottom: 50px;
+            overflow-x: hidden;
+        }
+
+        /* ── Container ── */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ── Header Card ── */
+        .header-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            position: relative;
+            display: none;
+        }
+
+        .train-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 5px;
+        }
+
+        .train-route {
+            font-size: 0.95rem;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .delay-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .badge-ontime {
+            background: rgba(46, 125, 50, 0.1);
+            color: #2e7d32;
+        }
+
+        .badge-delay {
+            background: rgba(198, 40, 40, 0.1);
+            color: #c62828;
+        }
+
+        /* ── Countdown Timer ── */
+        .countdown-wrapper {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+        }
+
+        .countdown-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .countdown-bg {
+            fill: none;
+            stroke: #e0e0e0;
+            stroke-width: 3;
+        }
+
+        .countdown-progress {
+            fill: none;
+            stroke: #1a73e8;
+            stroke-width: 3;
+            stroke-dasharray: 113;
+            /* 2 * pi * r (r=18) */
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 1s linear;
+        }
+
+        .countdown-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #1a73e8;
+        }
+
+        /* ── Next Stop Banner ── */
+        .next-stop-banner {
+            background: #e3f2fd;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #1a73e8;
+            display: none;
+        }
+
+        .next-stop-title {
+            font-weight: 700;
+            color: #1a73e8;
+            font-size: 1.05rem;
+        }
+
+        .next-stop-meta {
+            font-size: 0.85rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        /* ── Timeline Container ── */
+        .timeline-container {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            display: none;
+        }
+
+        .timeline-line {
+            position: absolute;
+            top: 20px;
+            bottom: 20px;
+            left: 50%;
+            width: 3px;
+            background: #ccc;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        /* ── Station Row ── */
+        .station-row {
+            display: flex;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 25px;
+            padding: 0 20px;
+            min-height: 60px;
+        }
+
+        .station-left {
+            flex: 1;
+            text-align: right;
+            padding-right: 40px;
+        }
+
+        .station-center {
+            width: 20px;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .station-right {
+            flex: 1;
+            text-align: left;
+            padding-left: 40px;
+        }
+
+        /* ── Station Details ── */
+        .stn-code {
+            font-weight: 800;
+            color: #333;
+            font-size: 1.1rem;
+            margin-bottom: 2px;
+        }
+
+        .stn-sch {
+            font-size: 0.8rem;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .stn-act {
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .text-ontime {
+            color: #2e7d32;
+        }
+
+        .text-delay {
+            color: #c62828;
+        }
+
+        .stn-name {
+            font-weight: 700;
+            color: #333;
+            font-size: 1rem;
+            position: absolute;
+            left: 30px;
+            top: -5px;
+            white-space: nowrap;
+        }
+
+        .stn-name sup {
+            color: #888;
+            font-weight: 600;
+            font-size: 0.65rem;
+            margin-left: 3px;
+        }
+
+        .stn-meta {
+            position: absolute;
+            left: 30px;
+            top: 18px;
+            font-size: 0.75rem;
+            color: #888;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* ── Dots ── */
+        .dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #ccc;
+            position: absolute;
+            top: 5px;
+            z-index: 3;
+            transition: all 0.5s ease;
+        }
+
+        .dot.passed {
+            border-color: #888;
+            background: #888;
+        }
+
+        .dot.upcoming {
+            border-color: #1a73e8;
+            background: #fff;
+        }
+
+        /* ── Active Train position ── */
+        .train-position {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #1a73e8;
+            z-index: 4;
+            box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.3);
+            animation: pulse 2s infinite;
+            transition: top 1s ease-in-out;
+            cursor: pointer;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(26, 115, 232, 0.6);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(26, 115, 232, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(26, 115, 232, 0);
+            }
+        }
+
+        /* ── Tooltip Bubble ── */
+        .train-tooltip {
+            position: absolute;
+            left: 35px;
+            top: -15px;
+            background: #1c2b3a;
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 5;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .hidden-tooltip {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
+        .train-tooltip::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 15px;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-right: 6px solid #1c2b3a;
+        }
+
+        .tooltip-msg {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .tooltip-sub {
+            color: #a0aec0;
+            font-size: 0.75rem;
+        }
+
+        .tooltip-hint {
+            display: inline-block;
+            margin-top: 4px;
+            padding: 2px 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            font-weight: 700;
+            color: #ffb74d;
+        }
+
+        /* ── No Halt Badge ── */
+        .no-halt-badge {
+            background: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 15px 0;
+            text-align: center;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: 2;
+            transition: background 0.2s;
+        }
+
+        .no-halt-badge:hover {
+            background: #e2e8f0;
+        }
+
+        .no-halt-list {
+            display: none;
+            font-size: 0.75rem;
+            color: #888;
+            text-align: center;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px dashed #ccc;
+        }
+
+        /* ── Loader & Errors ── */
+        #loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner-border {
+            color: #1a73e8;
+        }
+
+        #error-msg {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        /* ── Mobile adjustments ── */
+        @media (max-width: 600px) {
+            .stn-name {
+                position: static;
+                white-space: normal;
+                line-height: 1.2;
+                margin-bottom: 4px;
+                text-align: center;
+            }
+
+            .stn-meta {
+                position: static;
+                text-align: center;
+                display: block;
+                margin-bottom: 10px;
+            }
+
+            .station-center {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+            }
+
+            .station-row {
+                flex-direction: column;
+                text-align: center;
+                padding: 0 10px;
+                margin-bottom: 30px;
+            }
+
+            .station-left,
+            .station-right {
+                text-align: center;
+                padding: 0;
+            }
+
+            .timeline-line {
+                left: 20px;
+            }
+
+            .station-center {
+                width: 40px;
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+
+            .station-left {
+                margin-left: 50px;
+                text-align: left;
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 5px;
+            }
+
+            .station-right {
+                margin-left: 50px;
+                text-align: left;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .stn-code {
+                margin-bottom: 0;
+            }
+
+            .stn-name {
+                left: 0;
+                top: 0;
+                font-size: 0.95rem;
+                text-align: left;
+                margin-bottom: 2px;
+            }
+
+            .stn-meta {
+                left: 0;
+                top: 0;
+                text-align: left;
+                margin-bottom: 8px;
+            }
+
+            .dot {
+                left: 13px;
+            }
+
+            .train-position {
+                left: 20px;
+            }
+
+            .train-tooltip {
+                left: 40px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="common.css">
+</head>
+
+<body>
+    <div id="universal-header"></div>
+
+    <div class="container">
+        <div class="alert alert-danger" id="error-msg"></div>
+
+        <div id="loading">
+            <div class="spinner-border" role="status"></div>
+            <div class="mt-3 fw-bold text-muted">Fetching live train status...</div>
+        </div>
+
+        <!-- Header Section -->
+        <div class="header-card" id="headerCard">
+            <div class="countdown-wrapper" title="Auto-refreshing">
+                <svg class="countdown-svg" viewBox="0 0 40 40">
+                    <circle class="countdown-bg" cx="20" cy="20" r="18"></circle>
+                    <circle class="countdown-progress" id="timerCircle" cx="20" cy="20" r="18"></circle>
+                </svg>
+                <div class="countdown-text" id="timerText">55</div>
+            </div>
+            <div class="train-title"><span id="h-trainNo"></span> - <span id="h-trainName"></span></div>
+            <div class="train-route"><i class="bi bi-arrow-right-circle me-1"></i> <span id="h-source"></span> to <span
+                    id="h-dest"></span></div>
+            <div>
+                <span class="badge bg-secondary me-2"><i class="bi bi-calendar3 me-1"></i> <span
+                        id="h-date"></span></span>
+                <span class="delay-badge badge-ontime" id="h-delay"></span>
+            </div>
+        </div>
+
+        <!-- Next Stop Banner -->
+        <div class="next-stop-banner" id="nextStopBanner">
+            <div>
+                <div class="next-stop-title">Next Stop: <span id="n-stop"></span></div>
+                <div class="next-stop-meta">ETA in <span id="n-eta"></span> • <span id="n-delay" class="fw-bold"></span>
+                </div>
+            </div>
+            <i class="bi bi-train-front text-primary fs-3"></i>
+        </div>
+
+        <!-- Timeline Container -->
+        <div class="timeline-container" id="timelineContainer">
+            <div class="timeline-line"></div>
+            <div id="trainPosition" class="train-position" style="display: none; top: 0;">
+                <div class="train-tooltip" id="trainTooltip">
+                    <div class="tooltip-msg" id="t-msg1"></div>
+                    <div class="tooltip-sub" id="t-msg2"></div>
+                    <div class="tooltip-hint" id="t-hint"></div>
+                </div>
+            </div>
+            <div id="stationsList"></div>
+        </div>
+    </div>
+
+    <script src="common.js?v=4"></script>
+    <script>
+        // RapidAPI Settings
+        const API_KEY = "3f38736366mshba8bdde5d1a73aep189d9fjsn529d17f15361";
+        const API_HOST = "irctc1.p.rapidapi.com";
+
+        let countdownInterval;
+        let timeLeft = 55;
+        let currentTrainNo = '';
+        let currentStartDay = '0';
+        let lastResponseData = null;
+
+        // Read URL params and auto-fetch on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const trainNoParam = params.get('trainNo');
+            const startDayParam = params.get('startDay') || '0';
+
+            if (trainNoParam) {
+                currentTrainNo = trainNoParam.trim();
+                currentStartDay = startDayParam;
+                fetchLiveStatus(true);
+            } else {
+                // No params: show a friendly prompt in the error area
+                const errorEl = document.getElementById('error-msg');
+                errorEl.style.display = 'block';
+                errorEl.innerHTML = '<i class="bi bi-info-circle me-2"></i>Please search for a train from the <a href="index.html"><strong>Home page</strong></a>.';
+                errorEl.className = 'alert alert-info';
+            }
+        });
+
+        async function fetchLiveStatus(isInitialLoad = false) {
+            if (isInitialLoad) {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('headerCard').style.display = 'none';
+                document.getElementById('nextStopBanner').style.display = 'none';
+                document.getElementById('timelineContainer').style.display = 'none';
+                document.getElementById('error-msg').style.display = 'none';
+                clearInterval(countdownInterval);
+            }
+
+            try {
+                const response = await fetch(`https://${API_HOST}/api/v1/liveTrainStatus?trainNo=${currentTrainNo}&startDay=${currentStartDay}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-RapidAPI-Key': API_KEY,
+                        'X-RapidAPI-Host': API_HOST
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.data || data.status === false) {
+                    throw new Error(data.message || 'Failed to fetch train status');
+                }
+
+                renderStatus(data.data, isInitialLoad);
+
+                // Start or reset auto-refresh timer
+                startTimer();
+
+            } catch (err) {
+                document.getElementById('loading').style.display = 'none';
+                const errorEl = document.getElementById('error-msg');
+                errorEl.style.display = 'block';
+                errorEl.textContent = err.message || 'An error occurred while fetching the live status.';
+                clearInterval(countdownInterval);
+            }
+        }
+
+        function startTimer() {
+            clearInterval(countdownInterval);
+            timeLeft = 55;
+            updateTimerUI();
+
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerUI();
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    fetchLiveStatus(false); // Silent reload
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            document.getElementById('timerText').textContent = timeLeft;
+            const circle = document.getElementById('timerCircle');
+            const offset = 113 - (timeLeft / 55) * 113;
+            circle.style.strokeDashoffset = offset;
+        }
+
+        function formatDelayText(delayObj) {
+            if (!delayObj || delayObj.delay_indicator === 0) {
+                return { text: 'On Time', class: 'text-ontime' };
+            }
+            return { text: `${delayObj.delay_min}m late`, class: 'text-delay' };
+        }
+
+        function renderStatus(data, isInitialLoad) {
+            document.getElementById('loading').style.display = 'none';
+
+            // ── Header ──
+            document.getElementById('h-trainNo').textContent = data.train_number;
+            document.getElementById('h-trainName').textContent = data.train_name;
+            document.getElementById('h-source').textContent = data.source_route_id;
+            document.getElementById('h-dest').textContent = data.destination_route_id;
+            document.getElementById('h-date').textContent = data.train_start_date;
+
+            const delayBadge = document.getElementById('h-delay');
+            if (data.delay && data.delay.delay_indicator > 0) {
+                delayBadge.className = 'delay-badge badge-delay';
+                delayBadge.innerHTML = `<i class="bi bi-clock-history me-1"></i>Delayed by ${data.delay.delay_min} mins`;
+            } else {
+                delayBadge.className = 'delay-badge badge-ontime';
+                delayBadge.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i>On Time`;
+            }
+
+            document.getElementById('headerCard').style.display = 'block';
+
+            // ── Next Stop Banner ──
+            if (data.next_stoppage_info && data.next_stoppage_info.next_stoppage) {
+                document.getElementById('nextStopBanner').style.display = 'flex';
+                document.getElementById('n-stop').textContent = data.next_stoppage_info.next_stoppage;
+                document.getElementById('n-eta').textContent = data.next_stoppage_info.next_stoppage_time_diff || '--';
+
+                const nDelayEl = document.getElementById('n-delay');
+                if (data.delay && data.delay.delay_indicator > 0) {
+                    nDelayEl.className = 'fw-bold text-danger';
+                    nDelayEl.textContent = `Late by ${data.delay.delay_min}m`;
+                } else {
+                    nDelayEl.className = 'fw-bold text-success';
+                    nDelayEl.textContent = 'On Time';
+                }
+            } else {
+                document.getElementById('nextStopBanner').style.display = 'none';
+            }
+
+            // ── Timeline ──
+            const container = document.getElementById('stationsList');
+            if (isInitialLoad) container.innerHTML = ''; // Only clear on initial load
+
+            let html = '';
+            const allStations = [...(data.previous_stations || []), ...(data.upcoming_stations || [])];
+
+            // Sort stations by distance just in case
+            allStations.sort((a, b) => a.distance_from_source - b.distance_from_source);
+
+            allStations.forEach((stn, index) => {
+                // Calculate status
+                const isPassed = data.previous_stations && data.previous_stations.find(s => s.station_code === stn.station_code);
+                const dotClass = isPassed ? 'passed' : 'upcoming';
+
+                // Arrival formatting
+                const arrDelay = formatDelayText(stn.arrival_delay);
+                const arrActHtml = isPassed
+                    ? `<div class="stn-act ${arrDelay.class}">Act: ${stn.actual_arrival_time || '--'}</div>`
+                    : `<div class="stn-act ${arrDelay.class}">ETA: ${stn.eta || '--'}</div>`;
+
+                // Departure formatting
+                const depDelay = formatDelayText(stn.departure_delay);
+                const depActHtml = isPassed
+                    ? `<div class="stn-act ${depDelay.class}">Act: ${stn.actual_departure_time || '--'}</div>`
+                    : `<div class="stn-act ${depDelay.class}">ETD: ${stn.etd || '--'}</div>`;
+
+                // Render station row
+                html += `
+        <div class="station-row" id="stn-${index}" data-distance="${stn.distance_from_source}">
+            <div class="station-left">
+                <div class="stn-code">${stn.station_code}</div>
+                <div class="stn-sch">Sch: ${stn.sta || '--'}</div>
+                ${arrActHtml}
+            </div>
+            
+            <div class="station-center">
+                <div class="dot ${dotClass}" id="dot-${index}"></div>
+                <div class="stn-name d-none d-sm-block">${stn.station_name} <sup>${stn.stoppage_number || ''}</sup></div>
+                <div class="stn-meta d-none d-sm-block">${stn.distance_from_source} km • PF ${stn.platform_number || '-'}</div>
+            </div>
+            
+            <div class="station-right">
+                <div class="stn-code" style="color:transparent;">-</div> <!-- Spacer -->
+                <div class="stn-sch">Sch: ${stn.std || '--'}</div>
+                ${depActHtml}
+            </div>
+        </div>
+        `;
+
+                // Render No-Halt stations badge if any
+                if (stn.non_stops && stn.non_stops.length > 0) {
+                    const nonStopsList = stn.non_stops.map(ns => ns.station_name).join(', ');
+                    html += `
+            <div style="text-align: center;">
+                <div class="no-halt-badge" onclick="document.getElementById('nh-${index}').style.display = document.getElementById('nh-${index}').style.display === 'block' ? 'none' : 'block'">
+                    +${stn.non_stops.length} No-Halt Stations <i class="bi bi-chevron-down"></i>
+                </div>
+                <div class="no-halt-list" id="nh-${index}">
+                    ${nonStopsList}
+                </div>
+            </div>
+            `;
+                }
+            });
+
+            if (isInitialLoad) {
+                container.innerHTML = html;
+                document.getElementById('timelineContainer').style.display = 'block';
+            } else {
+                // If not initial load, we ideally use diffing, but for simplicity here we replace HTML
+                // CSS transitions handle the rest if DOM structure matches.
+                // To preserve train position animation, we update container html
+                container.innerHTML = html;
+            }
+
+            // ── Position Train Dot ──
+            // Use a slight delay to ensure DOM is rendered before positioning dot
+            setTimeout(() => {
+                positionTrain(data, allStations);
+            }, 100);
+        }
+
+        function positionTrain(data, allStations) {
+            const trainDot = document.getElementById('trainPosition');
+
+            if (!data.current_location_info || data.current_location_info.length === 0) {
+                trainDot.style.display = 'none';
+                return;
+            }
+
+            trainDot.style.display = 'block';
+
+            // Find the previous and next station elements
+            const prevStn = data.previous_stations && data.previous_stations.length > 0 ? data.previous_stations[data.previous_stations.length - 1] : null;
+            const nextStn = data.upcoming_stations && data.upcoming_stations.length > 0 ? data.upcoming_stations[0] : null;
+
+            let targetTop = 0;
+
+            if (prevStn && nextStn) {
+                // Find DOM indices
+                const prevIndex = allStations.findIndex(s => s.station_code === prevStn.station_code);
+                const nextIndex = allStations.findIndex(s => s.station_code === nextStn.station_code);
+
+                const prevEl = document.getElementById(`stn-${prevIndex}`);
+                const nextEl = document.getElementById(`stn-${nextIndex}`);
+
+                if (prevEl && nextEl) {
+                    const prevDistance = prevStn.distance_from_source;
+                    const nextDistance = nextStn.distance_from_source;
+                    const currentDistance = data.distance_from_source || prevDistance; // fallback
+
+                    // Calculate percentage between stations
+                    let percentage = (currentDistance - prevDistance) / (nextDistance - prevDistance);
+                    if (percentage < 0) percentage = 0;
+                    if (percentage > 1) percentage = 1;
+
+                    // Interpolate DOM position
+                    const prevTop = prevEl.offsetTop + 5; // +5 to align with dot
+                    const nextTop = nextEl.offsetTop + 5;
+
+                    targetTop = prevTop + (nextTop - prevTop) * percentage;
+                }
+            } else if (prevStn) {
+                // Train has reached destination or passed all tracked stations
+                const prevIndex = allStations.findIndex(s => s.station_code === prevStn.station_code);
+                const prevEl = document.getElementById(`stn-${prevIndex}`);
+                if (prevEl) targetTop = prevEl.offsetTop + 5;
+            } else if (nextStn) {
+                // Train hasn't started yet
+                const nextIndex = allStations.findIndex(s => s.station_code === nextStn.station_code);
+                const nextEl = document.getElementById(`stn-${nextIndex}`);
+                if (nextEl) targetTop = nextEl.offsetTop + 5;
+            }
+
+            trainDot.style.top = targetTop + 'px';
+
+            // Update Tooltip
+            const tooltip = document.getElementById('trainTooltip');
+            tooltip.classList.remove('hidden-tooltip');
+            
+            if (window.tooltipHideTimer) clearTimeout(window.tooltipHideTimer);
+            window.tooltipHideTimer = setTimeout(() => {
+                tooltip.classList.add('hidden-tooltip');
+            }, 8000);
+
+            if (!trainDot.hasClickListener) {
+                trainDot.addEventListener('click', () => {
+                    tooltip.classList.toggle('hidden-tooltip');
+                    if (window.tooltipHideTimer) clearTimeout(window.tooltipHideTimer);
+                });
+                trainDot.hasClickListener = true;
+            }
+
+            if (data.current_location_info.length > 0) {
+                document.getElementById('t-msg1').textContent = data.current_location_info[0].message || '';
+                document.getElementById('t-hint').textContent = data.current_location_info[0].hint || '';
+                document.getElementById('t-hint').style.display = data.current_location_info[0].hint ? 'inline-block' : 'none';
+            }
+            if (data.current_location_info.length > 1) {
+                document.getElementById('t-msg2').textContent = data.current_location_info[1].message || '';
+            } else {
+                document.getElementById('t-msg2').textContent = '';
+            }
+        }
+    </script>
+</body>
+
+</html>
