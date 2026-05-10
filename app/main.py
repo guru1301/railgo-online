@@ -80,7 +80,10 @@ app.include_router(pnr.router)
 app.include_router(tracking.router)
 app.include_router(auth.router)
 
-# Mount static files for frontend
-static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
-if os.path.exists(static_dir):
-    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+# Mount static files for frontend (Fallback for local dev)
+try:
+    static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
+    if os.path.exists(static_dir):
+        app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+except RuntimeError:
+    pass # Vercel handles static routing directly via vercel.json
