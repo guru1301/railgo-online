@@ -8,3 +8,5 @@ razorpay
 psycopg2-binary
 pydantic
 email-validator
+fastapi-cache2
+slowapi
