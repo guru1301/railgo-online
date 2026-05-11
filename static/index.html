@@ -329,28 +329,31 @@
       .enquiry-input-wrap { 
         width: 100%; 
         min-height: 52px; 
-        padding: 4px 4px 4px 14px; 
-        gap: 6px;
+        padding: 4px 8px 4px 12px; 
+        gap: 8px;
+        margin-left: -2px; /* Subtle pull to the left as requested */
       }
-      .enquiry-input { font-size: 1rem !important; }
+      .enquiry-input { font-size: 1rem !important; padding-left: 2px !important; }
       .enquiry-search-btn { width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0; }
       
       #live-start-day {
-        font-size: 0.8rem !important;
-        background: rgba(108,99,255,0.1) !important;
+        font-size: 0.78rem !important;
+        background: rgba(108,99,255,0.08) !important;
         border-radius: 8px !important;
-        padding: 4px 8px !important;
+        padding: 4px 6px !important;
         margin-right: 2px;
+        max-width: 85px;
       }
     }
     @media(max-width:480px) {
+      .enquiry-card { padding: 20px 14px; }
       .enquiry-input-wrap {
-        padding: 4px 4px 4px 12px;
+        padding: 4px 6px 4px 10px;
         gap: 4px;
       }
       #live-start-day {
-        max-width: 90px;
-        font-size: 0.75rem !important;
+        max-width: 75px;
+        font-size: 0.72rem !important;
       }
     }
   </style>
