@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Live Train Status - RailGo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
@@ -418,97 +418,82 @@
 
         /* ── Mobile adjustments ── */
         @media (max-width: 600px) {
-            .stn-name {
-                position: static;
-                white-space: normal;
-                line-height: 1.2;
-                margin-bottom: 4px;
-                text-align: center;
-            }
-
-            .stn-meta {
-                position: static;
-                text-align: center;
-                display: block;
-                margin-bottom: 10px;
-            }
-
-            .station-center {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                width: 100%;
+            /* Convert two-column timeline to left-rail layout */
+            .timeline-line {
+                left: 20px;
+                transform: none;
             }
 
             .station-row {
-                flex-direction: column;
-                text-align: center;
-                padding: 0 10px;
-                margin-bottom: 30px;
+                flex-direction: row;
+                padding: 0 12px 0 0;
+                margin-bottom: 24px;
+                min-height: 64px;
+                align-items: flex-start;
             }
 
-            .station-left,
-            .station-right {
-                text-align: center;
-                padding: 0;
-            }
-
-            .timeline-line {
-                left: 20px;
-            }
-
+            /* Left rail: dot column */
             .station-center {
                 width: 40px;
-                position: absolute;
-                left: 0;
-                top: 0;
+                min-width: 40px;
+                flex-direction: column;
+                align-items: center;
+                position: relative;
+                padding-top: 4px;
             }
 
-            .station-left {
-                margin-left: 50px;
-                text-align: left;
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 5px;
-            }
+            .dot { left: 13px; top: 4px; }
+            .train-position { left: 10px; }
+            .train-tooltip  { left: 38px; top: -8px; }
 
-            .station-right {
-                margin-left: 50px;
-                text-align: left;
-                display: flex;
-                justify-content: space-between;
-            }
-
-            .stn-code {
-                margin-bottom: 0;
-            }
-
+            /* Station name floats inside center rail */
             .stn-name {
-                left: 0;
-                top: 0;
-                font-size: 0.95rem;
-                text-align: left;
-                margin-bottom: 2px;
+                position: static;
+                white-space: normal;
+                font-size: 0.88rem;
+                margin-top: 22px;
+                text-align: center;
+                line-height: 1.2;
             }
-
             .stn-meta {
-                left: 0;
-                top: 0;
+                position: static;
+                text-align: center;
+                font-size: 0.72rem;
+                margin-top: 4px;
+                white-space: normal;
+            }
+
+            /* Right side: arrival info */
+            .station-left {
+                flex: 1;
                 text-align: left;
-                margin-bottom: 8px;
+                padding: 0 0 0 8px;
             }
 
-            .dot {
-                left: 13px;
-            }
+            /* Hide duplicate right column on mobile */
+            .station-right { display: none; }
 
-            .train-position {
-                left: 20px;
-            }
+            /* Bigger station code */
+            .stn-code { font-size: 1rem; }
+            .stn-sch  { font-size: 0.8rem; }
+            .stn-act  { font-size: 0.8rem; }
 
-            .train-tooltip {
-                left: 40px;
+            /* Header card full-width */
+            .header-card { padding: 16px; }
+            .train-title  { font-size: 1.15rem; }
+            .train-route  { font-size: 0.88rem; }
+
+            /* Next stop banner */
+            .next-stop-banner {
+                padding: 12px 14px;
+                border-radius: 10px;
+                gap: 10px;
             }
+            .next-stop-title { font-size: 0.95rem; }
+            .next-stop-meta  { font-size: 0.8rem; }
+
+            /* Timeline container */
+            .timeline-container { padding: 16px 0; border-radius: 12px; }
         }
     </style>
     <link rel="stylesheet" href="common.css">

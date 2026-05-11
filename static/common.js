@@ -953,10 +953,10 @@ function injectHeaderAndSidebar() {
             </div>
         </div>
         <nav class="nav-links">
-            <a href="index.html">Home</a>
-            <a href="about.html">About</a>
-            <a href="#">Contact</a>
-            <a href="#" id="nav-signup-link">Login / Sign Up</a>
+            <a href="index.html" class="nav-text-link">Home</a>
+            <a href="about.html" class="nav-text-link">About</a>
+            <a href="#" class="nav-text-link">Contact</a>
+            <a href="#" id="nav-signup-link" class="nav-text-link">Login / Sign Up</a>
             <div class="theme-toggle-container">
                 <i class="bi bi-sun-fill text-warning"></i>
                 <label class="theme-switch">

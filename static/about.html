@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 <title>Architecture & Documentation - RailGo</title>
 <script src="common.js?v=8"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
@@ -113,6 +113,32 @@
 .dark-mode .doc-step-title { color: #f8fafc; }
 .doc-step-text { font-size: .95rem; color: #64748b; line-height: 1.5; }
 .dark-mode .doc-step-text { color: #94a3b8; }
+
+/* ── Mobile overrides ──────────────────────────────────────── */
+@media (max-width: 768px) {
+    .page { padding-top: 76px !important; padding-bottom: 40px; }
+    .glass-card { padding: 20px 16px !important; border-radius: 18px !important; margin-bottom: 18px; }
+    .section-title { font-size: 1.35rem; margin-bottom: 14px; }
+    .tech-grid { grid-template-columns: 1fr !important; }
+    .tech-card { padding: 20px; }
+    .ai-grid { gap: 12px; }
+    .ai-card { padding: 20px 12px; }
+    .ai-logo { width: 56px; height: 56px; font-size: 1.7rem; }
+    .ai-name { font-size: 1rem; }
+    .profile-name { font-size: 1.7rem; }
+    .profile-avatar { width: 90px; height: 90px; font-size: 2.2rem; border-radius: 22px; }
+    /* Modal → bottom sheet on mobile */
+    .tech-modal-backdrop { padding: 0; align-items: flex-end; }
+    .tech-modal-content { border-radius: 20px 20px 0 0; max-height: 92vh; }
+    .tech-modal-body { padding: 20px 16px 32px; }
+    .doc-h { font-size: 1.35rem; }
+    .doc-table { font-size: 0.82rem; }
+    .doc-table th, .doc-table td { padding: 8px 10px; }
+}
+@media (max-width: 480px) {
+    .ai-grid { grid-template-columns: 1fr !important; }
+    .social-btn { padding: 9px 16px; font-size: 0.9rem; }
+}
 </style>
 </head>
 <body class="app-bg light-mode">
@@ -130,7 +156,7 @@
     <div class="d-inline-flex align-items-center gap-2 px-4 py-2 rounded-pill" style="background:rgba(108,99,255,.1);border:1px solid rgba(108,99,255,.2);color:#6c63ff;font-weight:700;margin-bottom:20px;">
       <i class="bi bi-mortarboard-fill"></i> Educational Project
     </div>
-    <h1 style="font-size:3.5rem;font-weight:900;color:#1e293b;letter-spacing:-1px;line-height:1.1;" class="mb-3">RailGo <span class="gradient-text">Documentation</span></h1>
+    <h1 style="font-size:clamp(1.9rem, 8vw, 3.5rem);font-weight:900;color:#1e293b;letter-spacing:-1px;line-height:1.1;" class="mb-3">RailGo <span class="gradient-text">Documentation</span></h1>
     <p style="font-size:1.1rem;color:#64748b;max-width:700px;margin:0 auto;">A fully functional, conceptual railway booking platform. Click on the modules below to explore the detailed backend architecture, database schemas, and API workflows.</p>
   </div>
 
