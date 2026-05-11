@@ -417,83 +417,63 @@
         .dark-mode .stn-name { color: #94a3b8; }
 
         /* ── Mobile adjustments ── */
-        @media (max-width: 600px) {
-            /* Convert two-column timeline to left-rail layout */
-            .timeline-line {
-                left: 20px;
-                transform: none;
-            }
-
-            .station-row {
-                flex-direction: row;
-                padding: 0 12px 0 0;
-                margin-bottom: 24px;
-                min-height: 64px;
-                align-items: flex-start;
-            }
-
-            /* Left rail: dot column */
-            .station-center {
-                width: 40px;
-                min-width: 40px;
-                flex-direction: column;
-                align-items: center;
-                position: relative;
-                padding-top: 4px;
-            }
-
-            .dot { left: 13px; top: 4px; }
-            .train-position { left: 10px; }
-            .train-tooltip  { left: 38px; top: -8px; }
-
-            /* Station name floats inside center rail */
+        /* ── Mobile adjustments ── */
+        @media (max-width: 768px) {
+            body { padding-top: 70px; padding-bottom: 30px; }
+            .container { padding: 12px; }
+            .header-card { padding: 18px 16px; margin-bottom: 16px; }
+            .train-title { font-size: 1.2rem; }
+            .train-route { font-size: 0.85rem; }
+            .countdown-wrapper { width: 36px; height: 36px; top: 15px; right: 15px; }
+            .countdown-text { font-size: 0.65rem; }
+            
+            .next-stop-banner { padding: 12px 14px; gap: 10px; margin-bottom: 16px; }
+            .next-stop-title { font-size: 0.95rem; }
+            .next-stop-meta { font-size: 0.8rem; }
+            
+            /* Center-rail layout for mobile */
+            .timeline-line { left: 50%; transform: translateX(-50%); width: 2px; }
+            .station-row { padding: 0 8px; gap: 10px; margin-bottom: 30px; }
+            .station-left { padding-right: 20px; }
+            .station-right { padding-left: 20px; }
+            .station-center { width: 14px; }
+            
+            .stn-code { font-size: 0.85rem; letter-spacing: -0.2px; }
+            .stn-sch, .stn-act { font-size: 0.72rem; }
+            .dot { width: 12px; height: 12px; top: 4px; }
+            .train-position { width: 16px; height: 16px; }
+            
             .stn-name {
-                position: static;
+                position: absolute;
+                left: 25px; /* Relative to center dot */
+                top: -4px;
+                font-size: 0.85rem;
+                width: 140px;
                 white-space: normal;
-                font-size: 0.88rem;
-                margin-top: 22px;
-                text-align: center;
-                line-height: 1.2;
+                line-height: 1.1;
+                text-align: left;
             }
             .stn-meta {
-                position: static;
-                text-align: center;
-                font-size: 0.72rem;
-                margin-top: 4px;
+                position: absolute;
+                left: 25px;
+                top: 24px;
+                font-size: 0.68rem;
+                width: 140px;
                 white-space: normal;
-            }
-
-            /* Right side: arrival info */
-            .station-left {
-                flex: 1;
                 text-align: left;
-                padding: 0 0 0 8px;
             }
+            
+            /* Toggle positions for alternating rows if needed, but standard center is better for mobile */
+            .train-tooltip { left: 25px; top: -10px; padding: 8px 12px; }
+            .tooltip-msg { font-size: 0.75rem; }
+            .tooltip-sub { font-size: 0.7rem; }
+        }
 
-            /* Hide duplicate right column on mobile */
-            .station-right { display: none; }
-
-            /* Bigger station code */
-            .stn-code { font-size: 1rem; }
-            .stn-sch  { font-size: 0.8rem; }
-            .stn-act  { font-size: 0.8rem; }
-
-            /* Header card full-width */
-            .header-card { padding: 16px; }
-            .train-title  { font-size: 1.15rem; }
-            .train-route  { font-size: 0.88rem; }
-
-            /* Next stop banner */
-            .next-stop-banner {
-                padding: 12px 14px;
-                border-radius: 10px;
-                gap: 10px;
-            }
-            .next-stop-title { font-size: 0.95rem; }
-            .next-stop-meta  { font-size: 0.8rem; }
-
-            /* Timeline container */
-            .timeline-container { padding: 16px 0; border-radius: 12px; }
+        @media (max-width: 480px) {
+            .station-row { gap: 5px; }
+            .station-left { padding-right: 15px; }
+            .station-right { padding-left: 15px; }
+            .stn-name, .stn-meta { width: 110px; }
         }
     </style>
     <link rel="stylesheet" href="common.css">
