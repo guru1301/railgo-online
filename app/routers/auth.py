@@ -4,9 +4,10 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 import os
 import shutil
+import io
 from app import models, database
 from app.auth import hash_password, verify_password, create_access_token, decode_token
-from app.email_utils import send_otp_email
+from app.email_utils import send_otp_email, send_forgot_password_email
 from app.rate_limit import limiter
 from app.security import (
     clear_session_cookie,
@@ -170,8 +171,27 @@ def update_profile(req: UpdateProfileRequest, request: Request, response: Respon
     set_session_cookie(response, new_token)
     return {"token": new_token, "user": {"id": user.id, "name": user.name, "email": user.email, "profile_pic": user.profile_pic}}
 
+# ── Allowed image magic bytes ─────────────────────────────────────────────────
+_ALLOWED_IMAGES = {
+    b'\xff\xd8\xff': ('jpeg', '.jpg'),
+    b'\x89PNG\r\n\x1a\n': ('png', '.png'),
+    b'GIF87a': ('gif', '.gif'),
+    b'GIF89a': ('gif', '.gif'),
+}
+MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 MB
+
+def _detect_image(header: bytes):
+    """Return (mime_type, extension) if header matches a known image, else None."""
+    for magic, info in _ALLOWED_IMAGES.items():
+        if header.startswith(magic):
+            return info
+    # WebP: RIFF????WEBP
+    if len(header) >= 12 and header[:4] == b'RIFF' and header[8:12] == b'WEBP':
+        return ('webp', '.webp')
+    return None
+
 @router.post("/profile/picture")
-def upload_profile_picture(
+async def upload_profile_picture(
     request: Request,
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
@@ -180,22 +200,36 @@ def upload_profile_picture(
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-        
+
+    # ── Read entire file into memory so we can validate it ────────────────────
+    contents = await file.read()
+
+    # 1. Enforce file size limit
+    if len(contents) > MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=400, detail="File too large. Maximum size is 5 MB.")
+
+    # 2. Validate MIME type via magic bytes (not just file extension)
+    image_info = _detect_image(contents[:12])
+    if image_info is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed."
+        )
+    _, safe_ext = image_info
+
     upload_dir = os.path.join(os.path.dirname(__file__), "..", "..", "static", "uploads")
     os.makedirs(upload_dir, exist_ok=True)
-    
-    file_ext = os.path.splitext(file.filename)[1]
-    if not file_ext: file_ext = ".jpg"
-    filename = f"user_{user.id}{file_ext}"
+
+    filename = f"user_{user.id}{safe_ext}"  # Always use the safe, detected extension
     file_path = os.path.join(upload_dir, filename)
-    
+
     with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-        
+        buffer.write(contents)
+
     user.profile_pic = f"uploads/{filename}"
     db.commit()
     db.refresh(user)
-    
+
     return {"message": "Profile picture updated", "profile_pic": user.profile_pic}
 
 
@@ -204,3 +238,95 @@ def logout(response: Response):
     clear_session_cookie(response)
     response.delete_cookie("railgo_csrf", path="/")
     return {"message": "Logged out"}
+
+
+# ── Change Password ────────────────────────────────────────────────────────────
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+@router.post("/change-password")
+@limiter.limit("5/minute")
+def change_password(req: ChangePasswordRequest, request: Request, db: Session = Depends(get_db)):
+    """Verify current password then set a new one."""
+    user_id = get_current_user_id(request)
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    if not verify_password(req.current_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="Current password is incorrect.")
+    if len(req.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters.")
+    if req.current_password == req.new_password:
+        raise HTTPException(status_code=400, detail="New password must be different from your current password.")
+    user.password_hash = hash_password(req.new_password)
+    db.commit()
+    return {"message": "Password changed successfully."}
+
+
+
+
+# ── Forgot Password ───────────────────────────────────────────────────────────
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class ResetPasswordRequest(BaseModel):
+    email: str
+    otp: str
+    new_password: str
+
+@router.post("/forgot-password")
+@limiter.limit("3/minute")
+def forgot_password(req: ForgotPasswordRequest, request: Request, db: Session = Depends(get_db)):
+    """Generate a password-reset OTP and send it to the user's email."""
+    email = req.email.lower().strip()
+
+    # Always return 200 to prevent email enumeration attacks
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if not user:
+        return {"message": "If that email is registered, a reset code has been sent."}
+
+    otp = ''.join(random.choices(string.digits, k=6))
+    expires_at = datetime.utcnow() + timedelta(minutes=10)
+
+    otp_record = db.query(models.OTPVerification).filter(models.OTPVerification.email == email).first()
+    if not otp_record:
+        otp_record = models.OTPVerification(email=email)
+        db.add(otp_record)
+
+    otp_record.otp = otp
+    otp_record.expires_at = expires_at
+    db.commit()
+
+    send_forgot_password_email(email, otp, user.name)
+    return {"message": "If that email is registered, a reset code has been sent."}
+
+
+@router.post("/reset-password")
+@limiter.limit("5/minute")
+def reset_password(req: ResetPasswordRequest, request: Request, db: Session = Depends(get_db)):
+    """Verify reset OTP and update the user's password."""
+    email = req.email.lower().strip()
+
+    if len(req.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
+
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid request.")
+
+    otp_record = db.query(models.OTPVerification).filter(models.OTPVerification.email == email).first()
+    if not otp_record or otp_record.otp != req.otp.strip():
+        raise HTTPException(status_code=400, detail="Invalid or expired reset code.")
+    if otp_record.expires_at < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="Reset code has expired. Please request a new one.")
+
+    user.password_hash = hash_password(req.new_password)
+    db.commit()
+
+    # Clean up the OTP record
+    db.delete(otp_record)
+    db.commit()
+
+    return {"message": "Password has been reset successfully. You can now log in."}
+

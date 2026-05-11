@@ -66,7 +66,24 @@ select.form-control{appearance:none;}
 .step-line{flex:1;height:2px;margin:0 8px;background:rgba(0,0,0,.1);}
 .dark-mode .step-line{background:rgba(255,255,255,.1);}
 .step.active .step-label{color:#6c63ff;}.step.done .step-label{color:#10b981;}.step.inactive .step-label{color:#94a3b8;}
-@media(max-width:768px){.booking-page{padding-top:80px;}.glass-card{padding:18px;}}
+@media(max-width:768px){
+  .booking-page{padding-top:72px;}
+  .glass-card{padding:16px 14px;}
+  .train-time{font-size:1.25rem;}
+  .section-title{font-size:.95rem;}
+  /* Passenger form: always full-width on mobile */
+  .row.g-3 > .col-md-6, .row.g-3 > .col-md-3 { width:100%; }
+  /* Button row: stack on mobile */
+  div[style*="display:flex;gap:10px;margin-top:10px;"]{ flex-direction:column; }
+  div[style*="display:flex;gap:10px;margin-top:10px;"] button { width:100%; }
+  /* Step labels: truncate on tiny screens */
+  .step-label { font-size:.72rem; }
+}
+@media(max-width:480px){
+  .step-label { display:none; }
+  .step-line  { min-width:14px; }
+}
+
 </style>
 <link rel="stylesheet" href="common.css">
 </head>
@@ -168,9 +185,14 @@ select.form-control{appearance:none;}
         </div>
       </div>
     </div>
-    <button class="btn-add-passenger mt-2" id="add-passenger-btn">
-      <i class="bi bi-plus-circle me-2"></i>Add Another Passenger
-    </button>
+    <div style="display:flex;gap:10px;margin-top:10px;">
+      <button class="btn-add-passenger" id="add-passenger-btn" style="flex:1;">
+        <i class="bi bi-plus-circle me-2"></i>Add Another Passenger
+      </button>
+      <button id="import-master-btn" onclick="openMasterPicker()" style="flex:1;border:2px solid rgba(108,99,255,.4);border-radius:12px;background:rgba(108,99,255,.06);color:#6c63ff;font-weight:600;font-size:.9rem;padding:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;" onmouseover="this.style.background='rgba(108,99,255,.14)'" onmouseout="this.style.background='rgba(108,99,255,.06)'">
+        <i class="bi bi-people-fill"></i>Import from Master List
+      </button>
+    </div>
   </div>
 
   <!-- Contact Details -->
@@ -198,6 +220,22 @@ select.form-control{appearance:none;}
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font-size:.78rem;color:#64748b;">
       <i class="bi bi-shield-lock-fill" style="color:#6c63ff;"></i>
       <span>Your details are encrypted and secure</span>
+    </div>
+  </div>
+</div>
+
+<!-- Master List Picker Modal -->
+<div id="ml-picker-backdrop" style="display:none;position:fixed;inset:0;z-index:200000;background:rgba(10,15,40,.6);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;width:min(520px,94vw);max-height:82vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.2);">
+    <div style="background:linear-gradient(135deg,#6c63ff,#f472b6);padding:20px 24px;border-radius:20px 20px 0 0;display:flex;justify-content:space-between;align-items:center;">
+      <div style="color:#fff;font-weight:700;font-size:1.05rem;"><i class="bi bi-people-fill me-2"></i>Select Passengers</div>
+      <button onclick="closeMasterPicker()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;">&times;</button>
+    </div>
+    <div id="ml-picker-body" style="padding:20px;"></div>
+    <div style="padding:0 20px 20px;">
+      <button onclick="importSelectedPassengers()" style="width:100%;background:linear-gradient(135deg,#007BFF,#FF69B4);color:#fff;border:none;border-radius:12px;padding:13px;font-weight:700;font-size:.95rem;cursor:pointer;transition:all .25s;">
+        <i class="bi bi-check2-circle me-2"></i>Add Selected to Booking
+      </button>
     </div>
   </div>
 </div>
@@ -329,6 +367,84 @@ document.addEventListener('DOMContentLoaded', () => {
   // Pre-fill email if logged in
   const user = RailGoAuth?.getUser?.();
   if (user?.email) document.getElementById('email').value = user.email;
+});
+
+// ── Master List Picker ───────────────────────────────────────────────────────
+let _mlPickerPassengers = [];
+
+async function openMasterPicker() {
+  const bd = document.getElementById('ml-picker-backdrop');
+  const body = document.getElementById('ml-picker-body');
+  bd.style.display = 'flex';
+  body.innerHTML = '<div style="text-align:center;padding:30px;"><div class="spinner-border" style="color:#6c63ff;"></div><div style="margin-top:12px;color:#64748b;">Loading your master list...</div></div>';
+  try {
+    const token = RailGoAuth.getToken();
+    const res = await fetch('/api/passengers', { headers: token ? {'Authorization':`Bearer ${token}`} : {} });
+    _mlPickerPassengers = await res.json();
+    if (!Array.isArray(_mlPickerPassengers) || _mlPickerPassengers.length === 0) {
+      body.innerHTML = '<div style="text-align:center;padding:30px;color:#94a3b8;"><i class="bi bi-people" style="font-size:2.5rem;display:block;margin-bottom:10px;"></i><div style="font-weight:600;">No saved passengers yet</div><div style="font-size:.85rem;margin-top:6px;">Add some in the Passenger Master List from the sidebar.</div></div>';
+      return;
+    }
+    let html = '<div style="margin-bottom:14px;font-size:.8rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;">Select passengers to add</div>';
+    _mlPickerPassengers.forEach(p => {
+      const initials = p.name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+      const gColor = p.gender === 'Female' ? '#f472b6' : p.gender === 'Male' ? '#3b82f6' : '#94a3b8';
+      html += `
+      <label style="display:flex;align-items:center;gap:14px;background:rgba(108,99,255,.05);border:1.5px solid rgba(108,99,255,.15);border-radius:12px;padding:13px 16px;margin-bottom:10px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='rgba(108,99,255,.1)'" onmouseout="this.style.background='rgba(108,99,255,.05)'">
+        <input type="checkbox" value="${p.id}" style="width:18px;height:18px;accent-color:#6c63ff;cursor:pointer;flex-shrink:0;">
+        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#6c63ff,#f472b6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem;flex-shrink:0;">${initials}</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;color:#1e293b;font-size:.93rem;">${p.name}</div>
+          <div style="font-size:.77rem;color:#64748b;margin-top:2px;"><span style="color:${gColor};font-weight:600;">${p.gender}</span> &middot; ${p.age} yrs</div>
+        </div>
+      </label>`;
+    });
+    body.innerHTML = html;
+  } catch {
+    body.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px;">Failed to load master list. Please try again.</div>';
+  }
+}
+
+function closeMasterPicker() {
+  document.getElementById('ml-picker-backdrop').style.display = 'none';
+}
+
+function importSelectedPassengers() {
+  const checked = document.querySelectorAll('#ml-picker-body input[type=checkbox]:checked');
+  if (!checked.length) { closeMasterPicker(); return; }
+  checked.forEach(cb => {
+    const p = _mlPickerPassengers.find(x => x.id == cb.value);
+    if (!p) return;
+    if (passengerCount >= 6) return;
+    passengerCount++;
+    const html = `
+    <div class="passenger-block" data-passenger-id="${passengerCount}">
+      <button type="button" class="remove-passenger" onclick="removePassenger(${passengerCount})"><i class="bi bi-x"></i></button>
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="passenger-num">Passenger #${passengerCount}</span>
+        <span class="badge" style="background:rgba(108,99,255,.15);color:#6c63ff;border-radius:20px;padding:3px 10px;font-size:.72rem;"><i class="bi bi-people-fill me-1"></i>From Master List</span>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Full Name</label><input type="text" class="form-control" id="name-${passengerCount}" value="${p.name}" required></div>
+        <div class="col-md-3"><label class="form-label">Age</label><input type="number" class="form-control" id="age-${passengerCount}" value="${p.age}" min="1" max="120" required></div>
+        <div class="col-md-3"><label class="form-label">Gender</label>
+          <select class="form-control" id="gender-${passengerCount}" required>
+            <option value="">Select</option>
+            <option value="Male" ${p.gender==='Male'?'selected':''}>Male</option>
+            <option value="Female" ${p.gender==='Female'?'selected':''}>Female</option>
+            <option value="Other" ${p.gender==='Other'?'selected':''}>Other</option>
+          </select>
+        </div>
+      </div>
+    </div>`;
+    document.getElementById('passengers-container').insertAdjacentHTML('beforeend', html);
+  });
+  closeMasterPicker();
+}
+
+// Close picker on backdrop click
+document.getElementById('ml-picker-backdrop')?.addEventListener('click', function(e) {
+  if (e.target === this) closeMasterPicker();
 });
 </script>
 </body></html>

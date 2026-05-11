@@ -401,6 +401,21 @@
             margin-bottom: 20px;
         }
 
+        /* ── Dark Mode ── */
+        .dark-mode { background-color: #0f172a; color: #f1f5f9; }
+        .dark-mode .header-card, .dark-mode .timeline-container { background: #1e293b; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .dark-mode .train-title, .dark-mode .stn-code { color: #f8fafc; }
+        .dark-mode .train-route, .dark-mode .stn-sch, .dark-mode .stn-act { color: #94a3b8; }
+        .dark-mode .next-stop-banner { background: rgba(26, 115, 232, 0.15); border-left-color: #3b82f6; }
+        .dark-mode .next-stop-title { color: #60a5fa; }
+        .dark-mode .next-stop-meta { color: #94a3b8; }
+        .dark-mode .timeline-line { background: #475569; }
+        .dark-mode .stn-dot { background: #1e293b; border-color: #475569; }
+        .dark-mode .stn-dot.passed { background: #22c55e; border-color: #22c55e; }
+        .dark-mode .stn-dot.current { border-color: #3b82f6; background: #1e293b; }
+        .dark-mode .pulse-ring { border-color: #3b82f6; }
+        .dark-mode .stn-name { color: #94a3b8; }
+
         /* ── Mobile adjustments ── */
         @media (max-width: 600px) {
             .stn-name {
@@ -555,10 +570,6 @@
 
     <script src="common.js?v=4"></script>
     <script>
-        // RapidAPI Settings
-        const API_KEY = "3f38736366mshba8bdde5d1a73aep189d9fjsn529d17f15361";
-        const API_HOST = "irctc1.p.rapidapi.com";
-
         let countdownInterval;
         let timeLeft = 55;
         let currentTrainNo = '';
@@ -595,13 +606,7 @@
             }
 
             try {
-                const response = await fetch(`https://${API_HOST}/api/v1/liveTrainStatus?trainNo=${currentTrainNo}&startDay=${currentStartDay}`, {
-                    method: 'GET',
-                    headers: {
-                        'X-RapidAPI-Key': API_KEY,
-                        'X-RapidAPI-Host': API_HOST
-                    }
-                });
+                const response = await fetch(`/api/trains/live-status?trainNo=${currentTrainNo}&startDay=${currentStartDay}`);
 
                 const data = await response.json();
 

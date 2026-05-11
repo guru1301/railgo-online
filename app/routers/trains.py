@@ -4,6 +4,8 @@ from typing import List, Optional
 from datetime import date
 from app import crud, schemas, database, models
 from fastapi_cache.decorator import cache
+import os
+import requests as http_requests
 
 router = APIRouter(prefix="/api/trains", tags=["trains"])
 
@@ -63,3 +65,28 @@ def get_train_schedule(train_number: str, db: Session = Depends(database.get_db)
             "distance": stop.distance_from_source
         })
     return results
+
+@router.get("/live-status")
+def get_live_status(trainNo: str, startDay: str = "0"):
+    API_KEY = os.getenv("RAPIDAPI_KEY")
+    API_HOST = os.getenv("RAPIDAPI_HOST", "irctc1.p.rapidapi.com")
+
+    if not API_KEY:
+        raise HTTPException(status_code=500, detail="RapidAPI key not configured")
+
+    try:
+        response = http_requests.get(
+            f"https://{API_HOST}/api/v1/liveTrainStatus",
+            params={"trainNo": trainNo, "startDay": startDay},
+            headers={
+                "X-RapidAPI-Key": API_KEY,
+                "X-RapidAPI-Host": API_HOST
+            },
+            timeout=15
+        )
+        data = response.json()
+        if response.status_code != 200 or data.get("status") is False:
+            raise HTTPException(status_code=502, detail=data.get("message", "Failed to fetch from RapidAPI"))
+        return data
+    except http_requests.RequestException as e:
+        raise HTTPException(status_code=502, detail=f"Could not reach RapidAPI: {str(e)}")

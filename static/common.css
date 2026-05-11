@@ -42,7 +42,8 @@
 
 body.app-bg {
     font-family: 'Poppins', sans-serif !important;
-    background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), url('upscalemedia-transformed.png') no-repeat center center/cover !important;
+    /* Gradient only — image is optional; prevents layout break if file is missing */
+    background: linear-gradient(135deg, #1a1a3e 0%, #0f2744 50%, #1a0a2e 100%) !important;
     background-attachment: fixed !important;
     color: #333;
     min-height: 100vh;
@@ -51,20 +52,20 @@ body.app-bg {
 }
 
 body.app-bg.dark-mode {
-    background: linear-gradient(rgba(8, 25, 55, 0.8), rgba(0, 17, 34, 0.9)), url('upscalemedia-transformed.png') no-repeat center center/cover !important;
-    color: #fff;
+    background: linear-gradient(135deg, #050d1a 0%, #081937 50%, #0a0416 100%) !important;
+    color: #f1f5f9;
 }
 
 body.app-bg.light-mode {
-    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(240, 244, 255, 0.8)), url('upscalemedia-transformed.png') no-repeat center center/cover !important;
-    color: #000;
+    background: linear-gradient(135deg, #e8eeff 0%, #f0f4ff 50%, #f5eeff 100%) !important;
+    color: #1e293b;
 }
 
 /* Original Header Restored */
 .header {
     width: 100%;
     background: linear-gradient(135deg, #081937, #001122);
-    padding: 15px 40px;
+    padding: 14px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -75,6 +76,7 @@ body.app-bg.light-mode {
     color: white;
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 12px;
 }
 
 .logo-container {
@@ -785,9 +787,28 @@ input:checked + .slider:before {
 .dark-mode .theme-text { color: #fff !important; }
 
 .main-content {
-    margin-top: 100px;
+    margin-top: 80px;
     padding: 20px 5%;
 }
+
+/* ── Light-mode text corrections ───────────────────────────────────────────── */
+.light-mode .train-card-title   { color: #1e293b !important; }
+.light-mode .theme-text         { color: #1e293b !important; }
+.light-mode .theme-text-card    { color: #1e293b !important; }
+.light-mode .text-muted-card    { color: #64748b !important; }
+.light-mode .date-item          { color: #374151; }
+
+/* ── Dark-mode text corrections ────────────────────────────────────────────── */
+.dark-mode .train-card-title    { color: #f1f5f9 !important; }
+.dark-mode .rg-muted            { color: #94a3b8 !important; }
+.dark-mode .horizontal-form .form-label { color: #cbd5e1 !important; }
+
+/* Ensure glass cards have readable text in both modes */
+.glass-panel, .rg-glass-card {
+    color: inherit;
+}
+.light-mode .glass-panel   { color: #1e293b; }
+.dark-mode  .glass-panel   { color: #f1f5f9; }
 
 /* ═══════════════════════════════════════════════
    AUTH MODAL
@@ -1009,4 +1030,127 @@ body.dark-mode .otp-input {
     color: #f8fafc;
     background: rgba(108, 99, 255, 0.1);
     border-color: rgba(108, 99, 255, 0.3);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — applies to all pages via common.css
+   max-width: 768px = tablets + phones
+   max-width: 480px = phones only
+══════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+    /* ── Header ── */
+    .header {
+        padding: 12px 16px;
+    }
+    .logo { font-size: 1.35rem; }
+    .logo i { font-size: 1.5rem; }
+    .nav-links { gap: 10px; }
+    .nav-links a { margin-left: 8px; font-size: 0.88rem; }
+    /* Hide text nav links on small screens — keep theme toggle + user chip */
+    .nav-links .nav-text-link { display: none; }
+    .user-chip-name { display: none; } /* show avatar only */
+
+    /* ── Sidebar ── */
+    .sidebar { width: min(280px, 85vw); }
+
+    /* ── Main content offset ── */
+    .main-content { margin-top: 72px; padding: 16px 4%; }
+
+    /* ── Search / Booking Engine ── */
+    .glass-panel {
+        padding: 20px 16px;
+        border-radius: 16px;
+    }
+    .horizontal-form {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .horizontal-form .form-group {
+        min-width: 0;
+        width: 100%;
+    }
+    .search-btn-premium {
+        height: 50px;
+        font-size: 1rem;
+        padding: 12px 20px;
+    }
+
+    /* ── Train cards (trains.html) ── */
+    .train-main-card {
+        padding: 16px;
+        margin-bottom: 14px;
+        border-radius: 14px;
+    }
+    .class-card { min-width: 130px; }
+    .schedule-table { font-size: 0.82rem; }
+    .schedule-table th, .schedule-table td { padding: 8px 10px; }
+
+    /* ── Date slider ── */
+    .date-item { min-width: 80px; padding: 8px 4px; font-size: 0.82rem; }
+    .active-date-highlight { width: 80px; }
+
+    /* ── Auth modals ── */
+    .auth-modal {
+        width: 94vw !important;
+        border-radius: 18px;
+        max-height: 92vh;
+        overflow-y: auto;
+    }
+    .auth-body { padding: 16px 18px 20px; }
+    .auth-perks { grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px 18px 12px; }
+    .auth-perk  { font-size: 0.78rem; }
+
+    /* ── Booking steps header ── */
+    .step-indicator { gap: 0; overflow-x: auto; }
+    .step-line { min-width: 20px; }
+
+    /* ── Print-ticket button: full width ── */
+    .btn-back { padding: 7px 14px; font-size: 0.82rem; }
+}
+
+@media (max-width: 480px) {
+
+    /* ── Header ── */
+    .header { padding: 10px 12px; }
+    .logo   { font-size: 1.15rem; }
+    .logo i { font-size: 1.3rem; }
+
+    /* ── Glass panel on index ── */
+    .glass-panel { padding: 16px 12px; border-radius: 14px; }
+
+    /* ── Auth modal ── */
+    .auth-modal { border-radius: 16px; }
+    .auth-perks { grid-template-columns: 1fr; }
+    .auth-header-logo { font-size: 1.1rem; }
+
+    /* ── General type scale ── */
+    body { font-size: 0.93rem; }
+
+    /* ── Train card time display ── */
+    .train-main-card .display-6 { font-size: 1.4rem !important; }
+
+    /* ── Full-width section cards ── */
+    .rg-glass-card, .glass-card { border-radius: 12px; }
+}
+
+/* ── Touch-friendly tap targets ── */
+@media (pointer: coarse) {
+    .sidebar-menu a  { padding: 18px 20px; }
+    .auth-btn        { padding: 16px; }
+    .search-btn-premium { height: 56px; }
+    .class-card      { padding: 12px 14px !important; }
+}
+
+/* ── Print styles for ticket pages ── */
+@media print {
+    .header, .sidebar, .overlay, .auth-backdrop,
+    .btn-back, #cancel-ticket-btn, .no-print { display: none !important; }
+    body { background: #fff !important; color: #000 !important; }
+    .glass-card, .rg-glass-card {
+        background: #fff !important;
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+    .booking-page, .main-content { margin-top: 0 !important; padding: 0 !important; }
 }

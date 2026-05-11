@@ -91,7 +91,21 @@ if (!sessionStorage.getItem('rg_booking') && !_flowGuard.selection) {
 /* Info box */
 .info-note{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:10px 14px;font-size:.82rem;color:#059669;display:flex;align-items:center;gap:8px;margin-top:14px;}
 .dark-mode .info-note{background:rgba(16,185,129,.12);color:#34d399;}
-@media(max-width:768px){.page{padding-top:80px;}.glass-card{padding:18px;}}
+@media(max-width:768px){
+  .page{padding-top:72px;}
+  .glass-card{padding:16px 14px;}
+  .journey-arc{flex-wrap:wrap; gap:10px;}
+  .j-time{font-size:1.2rem;}
+  .pay-total-amt{font-size:1.3rem;}
+  .step-bar{overflow-x:auto;}
+  .s-done .step-lbl,.s-active .step-lbl,.s-inactive .step-lbl{font-size:.7rem;}
+}
+@media(max-width:480px){
+  .step-lbl{display:none;}
+  .step-line{min-width:12px;}
+  .glass-card{padding:14px 12px;}
+  .btn-pay{font-size:.92rem;padding:13px;}
+}
 </style>
 <link rel="stylesheet" href="common.css">
 </head>

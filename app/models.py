@@ -113,3 +113,14 @@ class TrainStop(Base):
 
     train = relationship("Train", back_populates="train_stops")
     station = relationship("Station")
+
+class SavedPassenger(Base):
+    __tablename__ = "saved_passengers"
+    id         = Column(Integer, primary_key=True, index=True)
+    user_id    = Column(Integer, ForeignKey("users.id"))
+    name       = Column(String)
+    age        = Column(Integer)
+    gender     = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User")

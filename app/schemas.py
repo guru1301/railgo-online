@@ -101,3 +101,21 @@ class TrainSearchRequest(BaseModel):
 class CancelConfirmRequest(BaseModel):
     otp: str
 
+class SavedPassengerCreate(BaseModel):
+    name: str
+    age: int
+    gender: str
+
+class SavedPassengerUpdate(BaseModel):
+    name: str
+    age: int
+    gender: str
+
+class SavedPassenger(BaseModel):
+    id: int
+    name: str
+    age: int
+    gender: str
+    class Config:
+        from_attributes = True
+

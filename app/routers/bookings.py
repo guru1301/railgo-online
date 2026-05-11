@@ -15,9 +15,11 @@ from datetime import datetime
 
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
 
+import os
+
 # ── Razorpay credentials ──────────────────────────────────────────────────────
-RAZORPAY_KEY_ID     = "rzp_test_SlMpbTRhyixc23"
-RAZORPAY_KEY_SECRET = "PvFv90ykV5KoxV2Dhdzeoogn"
+RAZORPAY_KEY_ID     = os.getenv("RAZORPAY_KEY_ID", "rzp_test_SlMpbTRhyixc23")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "PvFv90ykV5KoxV2Dhdzeoogn")
 
 def _rzp_auth():
     token = base64.b64encode(f"{RAZORPAY_KEY_ID}:{RAZORPAY_KEY_SECRET}".encode()).decode()

@@ -135,7 +135,22 @@ if (!_confParams.get('pnr')) {
   .print-instructions li { margin-bottom: 6px; }
 }
 .print-only { display: none; }
-@media(max-width:768px){.page{padding-top:80px;}.glass-card{padding:18px;}.j-row{gap:10px;}.j-time{font-size:1.2rem;}}
+@media(max-width:768px){
+  .page{padding-top:72px;}
+  .glass-card{padding:16px 14px;}
+  .j-row{gap:10px; flex-wrap:wrap;}
+  .j-time{font-size:1.2rem;}
+  .pay-total-val{font-size:1.3rem;}
+  .success-banner{padding:24px 16px;}
+  .success-icon{font-size:2.8rem;}
+  .success-title{font-size:1.3rem;}
+}
+@media(max-width:480px){
+  .btn-ticket{min-width:100%;}
+  .glass-card{padding:14px 12px;}
+  .pnr-value{font-size:1.6rem;}
+  .otp-input{font-size:1.2rem; letter-spacing:2px; height:45px;}
+}
 /* Cancel Modal */
 .cancel-step { display: none; }
 .cancel-step.active { display: block; }

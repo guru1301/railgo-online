@@ -3,7 +3,9 @@ from typing import Optional
 from jose import JWTError, jwt
 
 
-SECRET_KEY = "railgo-secret-key-change-in-production-2026"
+import os
+
+SECRET_KEY = os.getenv("SECRET_KEY", "railgo-secret-key-change-in-production-2026")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 

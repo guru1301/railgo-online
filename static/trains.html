@@ -21,8 +21,8 @@
 @keyframes blobFloat{0%{transform:translate(0,0) scale(1);}50%{transform:translate(25px,20px) scale(1.04);}100%{transform:translate(-15px,25px) scale(0.97);}}
 
 /* ── Page layout ── */
-body.light-mode{background:#f0f4ff;}
-body.dark-mode{background: radial-gradient(circle at top right, #0f172a, #020617); color: #f8fafc;}
+body.light-mode{background:#f0f4ff;color:#1e293b;}
+body.dark-mode{background: linear-gradient(135deg,#050d1a,#081937,#0a0416); color: #f8fafc;}
 .trains-page{position:relative;z-index:1;padding-top:80px;padding-bottom:40px;}
 .trains-page > .container { max-width:1020px; }
 
@@ -372,6 +372,36 @@ body.dark-mode{background: radial-gradient(circle at top right, #0f172a, #020617
 @keyframes t-smoke-rise  { 100% { top:-50px; opacity:0.3; } }
 @keyframes t-wheel-spin  { 100% { transform:rotate(360deg); } }
 @keyframes t-track-move  { 100% { left:-200px; } }
+
+/* ── Mobile fixes for trains page ── */
+@media (max-width: 768px) {
+  .trains-page { padding-top: 72px; padding-bottom: 28px; }
+  .route-strip { padding: 14px 16px; }
+  .route-title { font-size: 1.1rem; }
+  .route-strip .d-flex { flex-wrap: wrap; gap: 10px; }
+  .route-strip button { font-size: .82rem; padding: 6px 14px; }
+  /* Filter row: wrap filters vertically */
+  .date-strip .d-flex.align-items-center.p-3 { flex-wrap: wrap; gap: 10px; }
+  /* Banner: stack on mobile */
+  .banner-fcf { flex-direction: column; gap: 14px; padding: 18px !important; text-align: center; }
+  .banner-fcf .text-end { text-align: center !important; }
+  .banner-fcf .me-4 { margin-right: 0 !important; }
+  /* Class cards scroll horizontally */
+  .class-card { min-width: 130px; padding: 9px 10px !important; }
+  /* Loading overlay */
+  .tpo-glass { padding: 36px 24px 32px; }
+  /* Train card header: wrap on very small screens */
+  .train-main-card .d-flex.justify-content-between { flex-wrap: wrap; gap: 6px; }
+  /* Journey time font */
+  [style*="font-size:1.35rem"] { font-size: 1.1rem !important; }
+}
+@media (max-width: 480px) {
+  .route-title { font-size: .95rem; }
+  .tpo-glass { padding: 28px 16px 24px; border-radius: 20px; }
+  .tpo-title { font-size: 1rem; }
+  .sched-btn { font-size: .75rem; padding: 4px 10px; }
+  [style*="font-size:1.35rem"] { font-size: 1rem !important; }
+}
 </style>
 
 </head>

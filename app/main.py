@@ -11,7 +11,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.database import engine, Base
 from app.rate_limit import limiter
-from app.routers import trains, bookings, pnr, tracking, auth
+from app.routers import trains, bookings, pnr, tracking, auth, passengers
 from app.security import CSRF_COOKIE_NAME
 
 # Create DB tables on startup
@@ -79,6 +79,7 @@ app.include_router(bookings.router)
 app.include_router(pnr.router)
 app.include_router(tracking.router)
 app.include_router(auth.router)
+app.include_router(passengers.router)
 
 # Mount static files for frontend (Fallback for local dev)
 try:
