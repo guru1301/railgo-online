@@ -917,7 +917,7 @@ input:checked + .slider:before {
     color: #9ca3af; font-size: 1rem; pointer-events: none;
 }
 .auth-input {
-    width: 100%; padding: 13px 14px 13px 40px;
+    width: 100%; padding: 13px 14px 13px 48px;
     border: 1.5px solid #e5e7eb; border-radius: 12px;
     font-size: 0.95rem; font-weight: 500; color: #111827;
     background: #f9fafb; transition: all 0.2s; outline: none;
