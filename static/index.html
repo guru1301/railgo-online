@@ -136,7 +136,7 @@
       color:#94a3b8; font-size:1rem; pointer-events:none; z-index:2;
     }
     .field-input {
-      width:100%; padding:13px 14px 13px 40px;
+      width:100%; padding:13px 14px 13px 44px;
       background: rgba(255,255,255,0.9);
       border: 1.5px solid rgba(0,0,0,0.1);
       border-radius:12px; font-size:0.93rem; font-weight:500; color:#1e293b;
@@ -244,7 +244,13 @@
       grid-template-columns: 1fr 1fr;
       gap: 16px;
     }
-    @media(max-width:640px){ .enquiry-grid { grid-template-columns: 1fr; } }
+    @media(max-width:640px){ 
+      .enquiry-grid { grid-template-columns: 1fr; } 
+      .enquiry-card { flex-direction: column; padding: 18px 16px; gap: 12px; text-align: center; }
+      .enquiry-icon-wrap { flex-direction: row; justify-content: center; margin-bottom: 4px; gap: 8px; }
+      .enquiry-input-wrap { width: 100%; min-height: 48px; }
+      .enquiry-search-btn { width: 100%; height: 44px; border-radius: 10px; margin-left: 0; }
+    }
     .enquiry-card {
       background: rgba(255,255,255,0.72);
       backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);

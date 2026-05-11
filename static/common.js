@@ -902,6 +902,9 @@ function _updateHeaderForUser(user) {
     const navSignupLink = document.getElementById('nav-signup-link');
     if (navSignupLink) navSignupLink.style.display = 'none';
 
+    const sidebarLoginLink = document.querySelector('.sidebar-login-link');
+    if (sidebarLoginLink) sidebarLoginLink.style.display = 'none';
+
     // Show logout in sidebar
     const logoutLink = document.querySelector('.logout-link');
     if (logoutLink) logoutLink.style.display = 'block';
@@ -971,11 +974,14 @@ function injectHeaderAndSidebar() {
         <button class="sidebar-close" id="sidebar-close"><i class="bi bi-x-lg"></i></button>
         <div class="sidebar-header" id="sidebar-header"><h3>RailGo Menu</h3></div>
         <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="bi bi-house-door-fill"></i><span>Home</span></a></li>
+            <li><a href="about.html"><i class="bi bi-info-circle-fill"></i><span>About RailGo</span></a></li>
             <li><a href="#" onclick="openMyBookingsModal(); return false;"><i class="bi bi-ticket-perforated-fill"></i><span>My Bookings</span></a></li>
             <li><a href="#" onclick="openMasterListModal(); return false;"><i class="bi bi-people-fill"></i><span>Passenger Master List</span></a></li>
             <li><a href="#" onclick="openLiveStatusModal(); return false;"><i class="bi bi-geo-alt-fill"></i><span>Live Train Status</span></a></li>
             <li><a href="#" onclick="openProfileModal(); return false;"><i class="bi bi-person"></i><span>My Profile</span></a></li>
             <li><a href="#"><i class="bi bi-question-circle"></i><span>Help &amp; Support</span></a></li>
+            <li class="sidebar-login-link"><a href="#" onclick="openAuthModal(null); return false;" style="color:#6c63ff;"><i class="bi bi-box-arrow-in-right" style="color:#6c63ff;"></i><span>Login / Sign Up</span></a></li>
             <li class="logout-link" style="display:none;"><a href="#" onclick="authLogout(); return false;" style="color:#ef4444;"><i class="bi bi-box-arrow-right" style="color:#ef4444;"></i><span>Logout</span></a></li>
         </ul>
     </div>
