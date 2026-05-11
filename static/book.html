@@ -39,11 +39,11 @@
 .dark-mode .passenger-num{color:#f1f5f9;}
 .form-label{font-size:.82rem;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;}
 .dark-mode .form-label{color:#94a3b8;}
-.form-control{background:rgba(255,255,255,0.95);border:1px solid rgba(0,0,0,0.1);color:#1a1a2e;padding:10px 14px;border-radius:10px;font-size:.93rem;font-weight:500;width:100%;transition:all .2s;}
+.form-control{background:rgba(255,255,255,0.95);border:1px solid rgba(0,0,0,0.1);color:#1a1a2e;padding:12px 14px;border-radius:10px;font-size:16px;font-weight:500;width:100%;transition:all .2s; min-height: 48px;}
 .form-control:focus{outline:none;border-color:#6c63ff;box-shadow:0 0 0 3px rgba(108,99,255,.15);background:#fff;}
 .dark-mode .form-control{background:rgba(20,26,50,.9);border-color:rgba(255,255,255,.1);color:#f1f5f9;}
 .dark-mode .form-control:focus{border-color:#818cf8;box-shadow:0 0 0 3px rgba(129,140,248,.2);}
-select.form-control{appearance:none;}
+select.form-control{appearance:none; padding-right: 32px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748b' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 12px; }
 .btn-add-passenger{border:2px dashed rgba(108,99,255,.4);width:100%;padding:12px;border-radius:12px;background:rgba(108,99,255,.06);color:#6c63ff;font-weight:600;font-size:.9rem;transition:all .2s;cursor:pointer;}
 .btn-add-passenger:hover{background:rgba(108,99,255,.14);border-color:#6c63ff;}
 .dark-mode .btn-add-passenger{color:#a5b4fc;border-color:rgba(165,180,252,.3);background:rgba(165,180,252,.06);}
@@ -67,15 +67,25 @@ select.form-control{appearance:none;}
 .dark-mode .step-line{background:rgba(255,255,255,.1);}
 .step.active .step-label{color:#6c63ff;}.step.done .step-label{color:#10b981;}.step.inactive .step-label{color:#94a3b8;}
 @media(max-width:768px){
+  body { font-size: 15px; }
   .booking-page{padding-top:72px;}
   .glass-card{padding:16px 14px;}
-  .train-time{font-size:1.25rem;}
+  .train-time{font-size:1.15rem;}
   .section-title{font-size:.95rem;}
+  /* Train header stack */
+  .train-header-card .row.align-items-center { flex-direction: column; text-align: center !important; gap: 12px; }
+  .train-header-card .col-5, .train-header-card .col-2 { width: 100% !important; text-align: center !important; }
+  .journey-line { margin: 8px 0 20px; }
+  
   /* Passenger form: always full-width on mobile */
   .row.g-3 > .col-md-6, .row.g-3 > .col-md-3 { width:100%; }
   /* Button row: stack on mobile */
   div[style*="display:flex;gap:10px;margin-top:10px;"]{ flex-direction:column; }
-  div[style*="display:flex;gap:10px;margin-top:10px;"] button { width:100%; }
+  div[style*="display:flex;gap:10px;margin-top:10px;"] button { width:100% !important; min-height: 48px; }
+  
+  .btn-back, .btn-proceed, .btn-add-passenger { min-height: 48px; display: flex; align-items: center; justify-content: center; }
+  .remove-passenger { width: 36px; height: 36px; font-size: 1.1rem; }
+  
   /* Step labels: truncate on tiny screens */
   .step-label { font-size:.72rem; }
 }

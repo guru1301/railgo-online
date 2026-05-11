@@ -136,20 +136,32 @@ if (!_confParams.get('pnr')) {
 }
 .print-only { display: none; }
 @media(max-width:768px){
+  body { font-size: 15px; }
   .page{padding-top:72px;}
   .glass-card{padding:16px 14px;}
-  .j-row{gap:10px; flex-wrap:wrap;}
-  .j-time{font-size:1.2rem;}
+  .j-row{gap:10px; flex-wrap:wrap; justify-content: space-between;}
+  .j-time{font-size:1.15rem;}
+  .j-line { flex-basis: 100%; order: 3; margin: 4px 0 12px; }
   .pay-total-val{font-size:1.3rem;}
   .success-banner{padding:24px 16px;}
   .success-icon{font-size:2.8rem;}
   .success-title{font-size:1.3rem;}
+  .btn-home, .btn-outline, .btn-ticket { min-height: 48px; display: flex; align-items: center; justify-content: center; }
 }
 @media(max-width:480px){
   .btn-ticket{min-width:100%;}
   .glass-card{padding:14px 12px;}
   .pnr-value{font-size:1.6rem;}
-  .otp-input{font-size:1.2rem; letter-spacing:2px; height:45px;}
+  .otp-input{font-size:1.2rem; letter-spacing:2px; height:48px;}
+  
+  .info-row { flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px 0; }
+  .info-label { width: 100%; font-size: 0.75rem; }
+  .info-val { font-size: 0.95rem; }
+  
+  .pax-row { align-items: flex-start; }
+  .pax-avatar { width: 40px; height: 40px; font-size: 0.9rem; }
+  .pax-name { font-size: 0.95rem; }
+  .pax-meta { font-size: 0.8rem; }
 }
 /* Cancel Modal */
 .cancel-step { display: none; }

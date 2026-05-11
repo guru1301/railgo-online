@@ -917,7 +917,7 @@ input:checked + .slider:before {
     color: #9ca3af; font-size: 1rem; pointer-events: none;
 }
 .auth-input {
-    width: 100%; padding: 13px 14px 13px 48px;
+    width: 100%; padding: 13px 14px 13px 48px !important;
     border: 1.5px solid #e5e7eb; border-radius: 12px;
     font-size: 0.95rem; font-weight: 500; color: #111827;
     background: #f9fafb; transition: all 0.2s; outline: none;
@@ -1297,4 +1297,54 @@ body.dark-mode .otp-input {
     .sidebar-menu a { padding: 18px 22px; }
     .auth-btn     { padding: 16px; min-height: 52px; }
     .user-chip    { padding: 6px 14px 6px 8px; }
+}
+
+/* ── Global Mobile UI Refinements ────────────────────────────────────────── */
+@media (max-width: 768px) {
+    :root {
+        --rg-space-4: 12px;
+        --rg-space-5: 16px;
+    }
+    
+    body {
+        font-size: 15px !important;
+    }
+
+    /* Standardize touch targets for common interactive elements */
+    input[type="text"], 
+    input[type="tel"], 
+    input[type="email"], 
+    input[type="number"], 
+    input[type="date"], 
+    select, 
+    button.btn,
+    .btn-search,
+    .btn-proceed,
+    .btn-add-passenger,
+    .btn-home,
+    .btn-outline {
+        min-height: 48px !important;
+        font-size: 16px !important; /* Prevent iOS auto-zoom */
+    }
+
+    .glass-card, .rg-glass-card, .search-card, .glass-panel {
+        padding: 16px !important;
+        border-radius: 16px !important;
+    }
+
+    /* Prevent text wrapping/collapsing issues in small containers */
+    .d-flex {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-heading {
+        font-size: 1.8rem !important;
+    }
+    
+    .container {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
 }
