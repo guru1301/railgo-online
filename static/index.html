@@ -7,7 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="common.css?v=3">
+  <link rel="stylesheet" href="common.css?v=5">
   <style>
     * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
 
@@ -88,8 +88,8 @@
       .search-grid { display: flex; flex-direction: column; gap: 16px; align-items: stretch; }
       .search-grid .swap-btn { align-self: center; transform: rotate(90deg); margin: -4px 0; }
       .search-grid .swap-btn:hover { transform: rotate(270deg); }
-      .input-wrapper input[type="text"], .input-wrapper input[type="date"], .input-wrapper select { min-height: 52px; font-size: 1rem; }
-      .search-btn { height: 52px !important; min-height: 52px !important; font-size: 1.1rem; width: 100% !important; margin-top: 6px; }
+      .field-input { min-height: 52px; font-size: 1rem; }
+      .btn-search { height: 52px !important; min-height: 52px !important; font-size: 1.1rem; width: 100% !important; margin-top: 6px; }
     }
 
     /* ── Swap Button ─────────────────────────────────────────── */
@@ -455,7 +455,7 @@
   </div>
   </div><!-- end page-wrapper -->
 
-<script src="common.js?v=4"></script>
+<script src="common.js?v=5"></script>
 <script>
   // ── Station Autocomplete ────────────────────────────────────────────────────
   let stations = [];
